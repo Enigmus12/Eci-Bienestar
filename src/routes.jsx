@@ -8,8 +8,12 @@ export default function AppRoutes() {
   return (
     <BrowserRouter>
       <div style={{ minHeight: '100vh', background: '#f8f8f8' }}>
-        <Navbar />
-        <div style={{ maxWidth: 600, margin: '72px auto 0 auto', padding: '1rem', width: '100%' }}>
+        {/* Barra roja superior fija */}
+        <div style={{ width: '100vw', height: 56, background: '#990000', position: 'fixed', top: 0, left: 0, zIndex: 2000, display: 'flex', alignItems: 'center' }}>
+          <Navbar />
+        </div>
+        {/* Contenido principal con margen superior para la barra */}
+        <div style={{ maxWidth: '100vw', margin: '72px auto 0 auto', padding: '1rem', width: '100%' }}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
