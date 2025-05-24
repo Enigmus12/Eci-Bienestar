@@ -1,6 +1,7 @@
 import React from 'react';
 import Carousel from '../components/Carousel';
 import Card from '../components/Card';
+import { useNavigate } from 'react-router-dom';
 
 const imagenes = [
   '/src/assets/resourses/1.jpg',
@@ -12,6 +13,7 @@ const imagenes = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
   return (
     <>
       <Carousel images={imagenes} minHeight={320} maxHeight={320} />
@@ -19,13 +21,14 @@ export default function Home() {
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 24, maxWidth: 1200 }}>
           <Card
             img="/src/assets/resourses/1.jpg"
-            title="Realizar Reservas"
-            desc="Agenda fácilmente un laboratorio para tus necesidades."
+            title="Generar Turno"
+            desc="Dale click en ingresar para generar un nuevo turno"
+            onClick={() => navigate('/generar-turno')}
           />
           <Card
-            img="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80"
-            title="Mis Reservas"
-            desc="Consulta y administra tus reservas activas."
+            img = "/src/assets/resourses/2.jpg"
+            title="Visualizar Turnos"
+            desc="Consulta y visualiza los turnos asignados"
           />
         </div>
       </div>

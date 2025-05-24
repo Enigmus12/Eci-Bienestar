@@ -28,20 +28,7 @@ export default function Card({ img, title, desc, onClick }) {
       <img src={img} alt={title} style={{ width: 90, height: 70, objectFit: 'cover', borderRadius: 8, marginBottom: 14 }} />
       <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0, marginBottom: 8 }}>{title}</h2>
       <p style={{ fontSize: 14, color: '#222', marginBottom: 14 }}>{desc}</p>
-      <button
-        onClick={onClick}
-        style={{
-          background: hover ? '#e60000' : '#000',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 8,
-          padding: '0.4rem 1.1rem',
-          fontWeight: 600,
-          fontSize: 15,
-          cursor: 'pointer',
-          transition: 'background 0.2s',
-        }}
-      >
+      <button className="card-button" onClick={onClick}>
         Ingresar
       </button>
     </div>

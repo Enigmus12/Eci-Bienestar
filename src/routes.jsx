@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Navbar from './components/Navbar';
+import GenerarTurnoPage from './pages/GenerarTurnoPage';
 
 export default function AppRoutes() {
   return (
@@ -17,6 +18,7 @@ export default function AppRoutes() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/generar-turno" element={<GenerarTurnoPage />} />
             {/* Agrega más rutas aquí */}
           </Routes>
         </div>

@@ -1,0 +1,92 @@
+/* Estilo base */
+.form-turno {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e4e4e4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+/* Grid de dos columnas para PC */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* Cada grupo de campos */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #990000;
+  margin-bottom: 0.4rem;
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.8rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #f9f9f9;
+}
+
+/* Botón de prioridad especial */
+.prioridad-btn-wrapper {
+  text-align: center;
+}
+
+.btn-prioridad {
+  background-color: #990000;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-prioridad:hover {
+  background-color: #b71c1c;
+}
+
+.texto-prioridad {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* Botón principal */
+.submit-button {
+  background: linear-gradient(90deg, #990000 60%, #b71c1c 100%);
+  color: #fff;
+  padding: 0.9rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(153, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease-in-out;
+}
+
+.submit-button:hover {
+  background: linear-gradient(90deg, #b71c1c 60%, #990000 100%);
+}
+
+/* Responsivo: 1 columna en pantallas pequeñas */
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
