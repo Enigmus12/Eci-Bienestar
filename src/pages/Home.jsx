@@ -2,9 +2,12 @@ import React from 'react';
 import Carousel from '../components/Carousel';
 
 const imagenes = [
-  'https://www.escuelaing.edu.co/uploads/images/2022/10/25/edificio-h-escuela-colombiana-de-ingenieria-julio-garavito-2-1920x1080.jpg',
-  'https://www.escuelaing.edu.co/uploads/images/2022/10/25/edificio-h-escuela-colombiana-de-ingenieria-julio-garavito-1-1920x1080.jpg',
-  // Puedes agregar más imágenes reales aquí
+  '/src/assets/resourses/1.jpg',
+  '/src/assets/resourses/2.jpg',
+  '/src/assets/resourses/3.jpg',
+  '/src/assets/resourses/4.jpg',
+  '/src/assets/resourses/5.jpg',
+  '/src/assets/resourses/6.jpg'
 ];
 
 function Card({ img, title, desc }) {
