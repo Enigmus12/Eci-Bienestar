@@ -1,7 +1,12 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+
 import Home from './pages/Home';
 import Login from './pages/Login';
+import User from './pages/User';
+import Coaches from './pages/Coaches';
+import Schedule from './pages/Schedule';
 import Navbar from './components/Navbar';
 import GenerarTurnoPage from './pages/GenerarTurnoPage';
 
@@ -18,6 +23,9 @@ export default function AppRoutes() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/user" element={<User />} />
+            <Route path="/coaches" element={<Coaches />} />
+            <Route path="/schedule" element={<Schedule />} />
             <Route path="/generar-turno" element={<GenerarTurnoPage />} />
             {/* Agrega más rutas aquí */}
           </Routes>
