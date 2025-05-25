@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import "../assets/Styles/form-turno.css";
 import TurnoAsignado from './TurnoAsignado';
+import ApiService from '../service/apiM1';
 
 export default function TurnoForm() {
   const [prioridadActiva, setPrioridadActiva] = useState(false);
@@ -29,21 +30,62 @@ export default function TurnoForm() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.nombre || !form.documento || !form.rol || !form.especialidad) {
+
+    if (
+      form.nombre.trim() === '' ||
+      form.documento.trim() === '' ||
+      form.rol.trim() === '' ||
+      form.especialidad.trim() === ''
+    ) {
       setErrorMsg("Por favor, complete todos los campos antes de continuar.");
       return;
     }
+
     setErrorMsg("");
-    setTurnoInfo({
-      turno: 'O-69',
-      especialidad: form.especialidad || 'Odontología',
-      nombre: form.nombre,
-      documento: form.documento,
-      rol: form.rol,
-    });
-    setShowAsignado(true);
+
+    try {
+      const dto = {
+        descripcion: "Turno generado desde formulario",
+        status: "IN_PROGRESS",
+        specialPriority: prioridadActiva,
+        userId: form.documento,
+        specialty: form.especialidad
+      };
+
+      console.log("DTO enviado:", dto);
+
+      // Paso 1: Crear turno
+      await ApiService.createTurno(dto);
+
+      // Paso 2: Obtener los turnos del usuario
+      const turnosUsuario = await ApiService.getShiftsByUserId(form.documento);
+      console.log("Turnos recibidos:", turnosUsuario);
+
+      // Paso 3: Filtrar el turno más reciente con turnCode válido
+      const turnoMasReciente = turnosUsuario
+        .filter(t =>
+          (t.status === "IN_PROGRESS" || t.status === "ASSIGNED") &&
+          /^(OD|MG|PS)-\d+$/.test(t.turnCode) // turnCode debe ser como OD-1, MG-2...
+        )
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+
+      if (!turnoMasReciente) throw new Error("No se pudo encontrar el turno creado con código válido.");
+
+      setTurnoInfo({
+        turno: turnoMasReciente.turnCode,
+        especialidad: turnoMasReciente.specialty,
+        nombre: form.nombre,
+        documento: form.documento,
+        rol: form.rol,
+      });
+
+      setShowAsignado(true);
+    } catch (err) {
+      console.error("Error al crear turno:", err);
+      setErrorMsg(err.message || 'No se pudo crear el turno');
+    }
   };
 
   if (showAsignado) {
@@ -73,8 +115,8 @@ export default function TurnoForm() {
           <label>Especialidad</label>
           <select name="especialidad" value={form.especialidad} onChange={handleChange}>
             <option value="">Seleccione...</option>
-            <option>Medicina</option>
-            <option>Psicología</option>
+            <option>Medicina General</option>
+            <option>Psicologia</option>
             <option>Odontología</option>
           </select>
         </div>
