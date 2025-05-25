@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import './VisualizacionTurno.css'; // Crear un archivo CSS para estilos personalizados
+import '../assets/Styles/VisualizacionTurno.css'; // Corregida la ruta
+import BotonRegresar from '../components/BotonRegresar';
 
 const usuarioMock = {
   nombre: 'Carlos Alberto Rodríguez',
@@ -43,7 +44,7 @@ export default function VisualizacionTurno() {
               <div className="nombre">{turnoActual.nombre}</div>
               <div className="hora">Hora programada: {turnoActual.hora}</div>
             </div>
-            <button className="boton-siguiente" onClick={manejarSiguienteTurno}>SIGUIENTE TURNO</button>
+            {/* Botón SIGUIENTE TURNO eliminado */}
           </section>
 
           <section className="proximos-turnos">
@@ -69,6 +70,7 @@ export default function VisualizacionTurno() {
           </video>
         </aside>
       </main>
+      <BotonRegresar texto="Volver al inicio" ruta="/" />
     </div>
   );
 }

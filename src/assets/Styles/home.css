@@ -1,0 +1,29 @@
+/* Estilo general del contenedor de tarjetas */
+.home-cards-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+/* Estilo del contenedor interno que envuelve las tarjetas */
+.home-cards-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+  max-width: 1200px;
+}
+
+/* Espacio debajo del carrusel */
+.carousel-spacing {
+  margin-bottom: 2rem;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+  .home-cards-wrapper {
+    gap: 16px;
+    padding: 0 1rem;
+  }
+}

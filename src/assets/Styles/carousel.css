@@ -1,0 +1,17 @@
+.carousel-container {
+  width: 100%;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 8px #0001;
+  position: relative;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.carousel-image {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+}

@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Carousel from '../components/Carousel';
 import Card from '../components/Card';
-import { useNavigate } from 'react-router-dom';
+import HomeInfo from '../components/HomeInfo';
+import '../assets/Styles/home.css';
 
 const imagenes = [
-  '/src/assets/resourses/1.jpg',
+  '/src/assets/resourses/uno.jpg',
   '/src/assets/resourses/2.jpg',
   '/src/assets/resourses/3.jpg',
   '/src/assets/resourses/4.jpg',
@@ -14,11 +16,15 @@ const imagenes = [
 
 export default function Home() {
   const navigate = useNavigate();
+
+
+
   return (
     <>
       <Carousel images={imagenes} minHeight={320} maxHeight={320} />
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', margin: '0 0 0 0' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 24, maxWidth: 1200 }}>
+
+      <div className="home-cards-container">
+        <div className="home-cards-wrapper">
           <Card
             img="/src/assets/resourses/1.jpg"
             title="Generar Turno"
@@ -26,12 +32,15 @@ export default function Home() {
             onClick={() => navigate('/generar-turno')}
           />
           <Card
-            img = "/src/assets/resourses/2.jpg"
+            img="/src/assets/resourses/2.jpg"
             title="Visualizar Turnos"
             desc="Consulta y visualiza los turnos asignados"
+            onClick={() => navigate('/visualizacion-turno')}
           />
         </div>
       </div>
+
+      <HomeInfo />
     </>
   );
 }
