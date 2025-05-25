@@ -9,6 +9,9 @@ import Coaches from './pages/Coaches';
 import Schedule from './pages/Schedule';
 import Navbar from './components/Navbar';
 import GenerarTurnoPage from './pages/GenerarTurnoPage';
+import AdminTurno from './pages/AdminTurno';
+import ProfesionalTurnos from './pages/ProfesionalTurnos';
+import VisualizacionTurno from './pages/VisualizacionTurno';
 
 export default function AppRoutes() {
   return (
@@ -27,6 +30,9 @@ export default function AppRoutes() {
             <Route path="/coaches" element={<Coaches />} />
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/generar-turno" element={<GenerarTurnoPage />} />
+            <Route path="/admin-turno" element={<AdminTurno />} />
+            <Route path="/profesional-turnos" element={<ProfesionalTurnos />} />
+            <Route path="/visualizacion-turno" element={<VisualizacionTurno />} />
             {/* Agrega más rutas aquí */}
           </Routes>
         </div>
