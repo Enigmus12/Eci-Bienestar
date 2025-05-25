@@ -2,35 +2,61 @@ import React, { useState, useEffect } from 'react';
 import ApiService from '../service/api';
 
 export default function ReservationsSchedules() {
-  const [scheduleGroupId, setScheduleGroupId] = useState('');
   const [schedules, setSchedules] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState(null);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+
+  const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+  const dayLabels = {
+    'MONDAY': 'Lunes',
+    'TUESDAY': 'Martes', 
+    'WEDNESDAY': 'Miércoles',
+    'THURSDAY': 'Jueves',
+    'FRIDAY': 'Viernes',
+    'SATURDAY': 'Sábado'
+  };
+
+  // Generar horas de 7:00 a 17:00
+  const generateTimeSlots = () => {
+    const slots = [];
+    for (let hour = 7; hour <= 17; hour++) {
+      slots.push(`${hour.toString().padStart(2, '0')}:00`);
+    }
+    return slots;
+  };
+
+  const timeSlots = generateTimeSlots();
 
   useEffect(() => {
-    const fetchSchedules = async () => {
-      try {
-        const data = await ApiService.getAllSchedules();
-        setSchedules(data);
-      } catch (err) {
-        setError('No se pudieron cargar los horarios');
-      }
-    };
     fetchSchedules();
   }, []);
 
-  const handleReserve = async (e) => {
-    e.preventDefault();
+  const fetchSchedules = async () => {
+    try {
+      const data = await ApiService.getAllSchedules();
+      setSchedules(data);
+    } catch (err) {
+      setError('No se pudieron cargar los horarios');
+    }
+  };
+
+  const handleReserve = async () => {
+    if (!selectedGroup) return;
+    
     setError('');
     setResult(null);
     setLoading(true);
+    
     try {
-      const res = await ApiService.reserveGymGroup(scheduleGroupId);
+      const res = await ApiService.reserveGymGroup(selectedGroup.scheduleGroupId);
       setResult(res);
       // Refrescar los horarios para actualizar la capacidad
-      const data = await ApiService.getAllSchedules();
-      setSchedules(data);
+      await fetchSchedules();
+      setShowModal(false);
+      setSelectedGroup(null);
     } catch (err) {
       setError(err.message || 'Error al reservar');
     } finally {
@@ -38,56 +64,331 @@ export default function ReservationsSchedules() {
     }
   };
 
+  const getScheduleForSlot = (day, time) => {
+    return schedules.find(schedule => 
+      schedule.dayOfWeek === day && schedule.startTime === time
+    );
+  };
+
+  const getGroupSchedules = (scheduleGroupId) => {
+    return schedules.filter(s => s.scheduleGroupId === scheduleGroupId);
+  };
+
+  const handleSlotClick = (schedule) => {
+    if (schedule) {
+      const groupSchedules = getGroupSchedules(schedule.scheduleGroupId);
+      setSelectedGroup({
+        ...schedule,
+        groupSchedules
+      });
+      setShowModal(true);
+    }
+  };
+
+  const getCapacityColor = (capacity) => {
+    if (capacity >= 20) return '#4ade80'; // Verde
+    if (capacity >= 10) return '#facc15'; // Amarillo
+    return '#f87171'; // Rojo
+  };
+
   return (
-    <div style={{ padding: '2rem', textAlign: 'center', maxWidth: 500, margin: '0 auto' }}>
-      <h2>Reservar Grupo de Horarios</h2>
-      <form onSubmit={handleReserve} style={{ marginBottom: 24 }}>
-        <select
-          value={scheduleGroupId}
-          onChange={e => setScheduleGroupId(e.target.value)}
-          required
-          style={{ padding: 8, width: '80%', borderRadius: 6, border: '1px solid #ccc', fontSize: 16 }}
-        >
-          <option value="">Selecciona un grupo de horarios</option>
-          {Array.from(new Set(schedules.map(s => s.scheduleGroupId))).map(groupId => (
-            <option key={groupId} value={groupId}>{groupId}</option>
-          ))}
-        </select>
-        <button type="submit" style={{ marginLeft: 12, background: '#990000', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', fontWeight: 600, fontSize: 16 }} disabled={loading}>
-          Reservar
-        </button>
-      </form>
-      {scheduleGroupId && (
-        <div style={{ marginBottom: 16, background: '#f8f8f8', borderRadius: 8, padding: 12, fontSize: 15 }}>
-          <b>Horarios del grupo seleccionado:</b>
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 10 }}>
-            <thead>
-              <tr style={{ background: '#eee' }}>
-                <th style={{ border: '1px solid #ccc', padding: 6 }}>Día</th>
-                <th style={{ border: '1px solid #ccc', padding: 6 }}>Hora inicio</th>
-                <th style={{ border: '1px solid #ccc', padding: 6 }}>Hora fin</th>
-                <th style={{ border: '1px solid #ccc', padding: 6 }}>Capacidad</th>
-              </tr>
-            </thead>
-            <tbody>
-              {schedules.filter(s => s.scheduleGroupId === scheduleGroupId).map(s => (
-                <tr key={s.id}>
-                  <td style={{ border: '1px solid #ccc', padding: 6 }}>{s.dayOfWeek}</td>
-                  <td style={{ border: '1px solid #ccc', padding: 6 }}>{s.startTime}</td>
-                  <td style={{ border: '1px solid #ccc', padding: 6 }}>{s.endTime}</td>
-                  <td style={{ border: '1px solid #ccc', padding: 6 }}>{s.capacity}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#1f2937' }}>
+        Horarios del Gimnasio
+      </h2>
+      
+      {error && (
+        <div style={{
+          color: '#dc2626',
+          background: '#fef2f2',
+          border: '1px solid #fecaca',
+          borderRadius: '8px',
+          padding: '12px',
+          marginBottom: '1rem',
+          textAlign: 'center'
+        }}>
+          {error}
         </div>
       )}
-      {loading && <div>Procesando reserva...</div>}
-      {error && <div style={{ color: '#990000', fontWeight: 600 }}>{error}</div>}
+
       {result && (
-        <div style={{ color: 'green', fontWeight: 600, marginTop: 16 }}>
-          Reserva realizada con éxito.
-          <pre style={{ textAlign: 'left', background: '#f3f3f3', padding: 12, borderRadius: 8, marginTop: 8, fontSize: 14 }}>{JSON.stringify(result, null, 2)}</pre>
+        <div style={{
+          color: '#059669',
+          background: '#f0fdf4',
+          border: '1px solid #bbf7d0',
+          borderRadius: '8px',
+          padding: '12px',
+          marginBottom: '1rem',
+          textAlign: 'center'
+        }}>
+          ¡Reserva realizada con éxito!
+        </div>
+      )}
+
+      {/* Calendario de horarios */}
+      <div style={{
+        border: '1px solid #e5e7eb',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+      }}>
+        {/* Header con días */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '100px repeat(6, 1fr)',
+          background: '#f9fafb',
+          borderBottom: '2px solid #e5e7eb'
+        }}>
+          <div style={{
+            padding: '1rem',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            borderRight: '1px solid #e5e7eb'
+          }}>
+            Hora
+          </div>
+          {days.map(day => (
+            <div key={day} style={{
+              padding: '1rem',
+              fontWeight: 'bold',
+              textAlign: 'center',
+              borderRight: day !== 'SATURDAY' ? '1px solid #e5e7eb' : 'none'
+            }}>
+              {dayLabels[day]}
+            </div>
+          ))}
+        </div>
+
+        {/* Filas de horarios */}
+        {timeSlots.map(time => (
+          <div key={time} style={{
+            display: 'grid',
+            gridTemplateColumns: '100px repeat(6, 1fr)',
+            borderBottom: '1px solid #e5e7eb'
+          }}>
+            <div style={{
+              padding: '1rem',
+              textAlign: 'center',
+              fontWeight: '500',
+              background: '#f9fafb',
+              borderRight: '1px solid #e5e7eb'
+            }}>
+              {time}
+            </div>
+            {days.map(day => {
+              const schedule = getScheduleForSlot(day, time);
+              return (
+                <div
+                  key={`${day}-${time}`}
+                  onClick={() => handleSlotClick(schedule)}
+                  style={{
+                    padding: '0.5rem',
+                    borderRight: day !== 'SATURDAY' ? '1px solid #e5e7eb' : 'none',
+                    cursor: schedule ? 'pointer' : 'default',
+                    background: schedule ? '#fff' : '#f9fafb',
+                    transition: 'all 0.2s ease',
+                    minHeight: '60px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (schedule) {
+                      e.target.style.background = '#f3f4f6';
+                      e.target.style.transform = 'scale(1.02)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (schedule) {
+                      e.target.style.background = '#fff';
+                      e.target.style.transform = 'scale(1)';
+                    }
+                  }}
+                >
+                  {schedule && (
+                    <>
+                      <div style={{
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        color: '#374151',
+                        marginBottom: '4px'
+                      }}>
+                        {schedule.startTime} - {schedule.endTime}
+                      </div>
+                      <div style={{
+                        fontSize: '10px',
+                        padding: '2px 6px',
+                        borderRadius: '12px',
+                        background: getCapacityColor(schedule.capacity),
+                        color: 'white',
+                        fontWeight: '500'
+                      }}>
+                        {schedule.capacity} cupos
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      {/* Leyenda */}
+      <div style={{
+        marginTop: '1rem',
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '1rem',
+        fontSize: '14px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{
+            width: '16px',
+            height: '16px',
+            borderRadius: '50%',
+            background: '#4ade80'
+          }}></div>
+          <span>Alta disponibilidad (20+ cupos)</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{
+            width: '16px',
+            height: '16px',
+            borderRadius: '50%',
+            background: '#facc15'
+          }}></div>
+          <span>Media disponibilidad (10-19 cupos)</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{
+            width: '16px',
+            height: '16px',
+            borderRadius: '50%',
+            background: '#f87171'
+          }}></div>
+          <span>Baja disponibilidad (&lt;10 cupos)</span>
+        </div>
+      </div>
+
+      {/* Modal de detalles y reserva */}
+      {showModal && selectedGroup && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '2rem',
+            maxWidth: '600px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflow: 'auto',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+          }}>
+            <h3 style={{ margin: '0 0 1rem 0', color: '#1f2937' }}>
+              Detalles del Grupo de Horarios
+            </h3>
+            
+            <div style={{
+              background: '#f9fafb',
+              borderRadius: '8px',
+              padding: '1rem',
+              marginBottom: '1rem'
+            }}>
+              <p style={{ margin: '0 0 0.5rem 0' }}>
+                <strong>ID del Grupo:</strong> {selectedGroup.scheduleGroupId}
+              </p>
+              <p style={{ margin: '0 0 0.5rem 0' }}>
+                <strong>Fechas:</strong> {selectedGroup.startDate} - {selectedGroup.endDate}
+              </p>
+            </div>
+
+            <h4 style={{ margin: '1rem 0', color: '#374151' }}>
+              Horarios incluidos en este grupo:
+            </h4>
+            
+            <div style={{ marginBottom: '2rem' }}>
+              {selectedGroup.groupSchedules.map(schedule => (
+                <div key={schedule.id} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '0.75rem',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  marginBottom: '0.5rem',
+                  background: '#fff'
+                }}>
+                  <div>
+                    <strong>{dayLabels[schedule.dayOfWeek]}</strong>
+                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                      {schedule.startTime} - {schedule.endTime}
+                    </div>
+                  </div>
+                  <div style={{
+                    padding: '4px 12px',
+                    borderRadius: '16px',
+                    background: getCapacityColor(schedule.capacity),
+                    color: 'white',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}>
+                    {schedule.capacity} cupos
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{
+              display: 'flex',
+              gap: '1rem',
+              justifyContent: 'flex-end'
+            }}>
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  setSelectedGroup(null);
+                }}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  background: 'white',
+                  color: '#374151',
+                  cursor: 'pointer',
+                  fontWeight: '500'
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleReserve}
+                disabled={loading}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  border: 'none',
+                  borderRadius: '8px',
+                  background: loading ? '#9ca3af' : '#dc2626',
+                  color: 'white',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  fontWeight: '600'
+                }}
+              >
+                {loading ? 'Reservando...' : 'Confirmar Reserva'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
