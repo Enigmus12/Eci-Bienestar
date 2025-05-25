@@ -290,6 +290,56 @@ class ApiService {
     return response.json();
   }
 
+   // Obtener todos los horarios
+  static async getAllSchedules() {
+    const token = this.getToken();
+    const response = await fetch(`${API_BASE_URL}/gym-schedules`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al obtener los horarios');
+    }
+    return response.json();
+  }
+
+  // Obtener días reprogramados por usuario
+  static async getRescheduledByUser(userId) {
+    const token = this.getToken();
+    const response = await fetch(`${API_BASE_URL}/daily-schedule/rescheduled/by-user/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al obtener días reprogramados');
+    }
+    return response.json();
+  }
+    // Modifica la capacidad de un grupo de horarios por scheduleGroupId
+  static async updateGroupCapacity(scheduleGroupId, capacity) {
+    const token = this.getToken();
+    const response = await fetch(`${API_BASE_URL}/gym-schedules/group-capacity/${scheduleGroupId}?capacity=${capacity}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al modificar la capacidad del grupo');
+    }
+    return response.json();
+  }
+
 
 }
 

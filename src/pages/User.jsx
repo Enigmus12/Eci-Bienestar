@@ -31,9 +31,11 @@ const UserDashboard = () => {
     <div style={{ padding: '2rem', textAlign: 'center' }}>
       <h2>Bienvenido Usuario</h2>
       <p>Esta es la ventana de usuario después de iniciar sesión.</p>
-      <Button onClick={() => navigate('/ReservationsSchedules')} style={{ marginTop: 24 }}>
-        Ir a Reservar Horarios
-      </Button>
+      {!loading && !hasReservation && (
+        <Button onClick={() => navigate('/ReservationsSchedules')} style={{ marginTop: 24 }}>
+          Ir a Reservar Horarios
+        </Button>
+      )}
       {!loading && hasReservation && (
         <>
           <Button onClick={() => navigate('/MyRoutines')} style={{ marginTop: 24, marginLeft: 16 }}>
@@ -41,6 +43,9 @@ const UserDashboard = () => {
           </Button>
           <Button onClick={() => navigate('/PhysicalRecords')} style={{ marginTop: 24, marginLeft: 16 }}>
             Registrar datos físicos
+          </Button>
+          <Button onClick={() => navigate('/MyReservations')} style={{ marginTop: 24, marginLeft: 16 }}>
+            Ver mis horarios
           </Button>
         </>
       )}

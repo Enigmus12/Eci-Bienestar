@@ -19,6 +19,8 @@ import VisualizacionTurno from './pages/VisualizacionTurno';
 import PhysicalRecords from './pages/PhysicalRecords';
 import GetRoutines from './pages/GetRoutines';
 import AllPhysicalRecords from './pages/AllPhysicalRecords';
+import MyReservations from './pages/MyReservations';
+import CoachSchedules from './pages/CoachSchedules';
 
 export default function AppRoutes() {
   return (
@@ -46,6 +48,8 @@ export default function AppRoutes() {
             <Route path="/visualizacion-turno" element={<VisualizacionTurno />} />
             <Route path="/getroutines" element={<GetRoutines />} />
             <Route path="/all-physical-records" element={<AllPhysicalRecords />} />
+            <Route path="/MyReservations" element={<MyReservations />} />
+            <Route path="/coach-schedules" element={<CoachSchedules />} />
           </Routes>
         </div>
       </div>
