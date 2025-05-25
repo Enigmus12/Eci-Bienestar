@@ -5,13 +5,17 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import User from './pages/User';
+import CreateRoutine from './pages/CreateRoutine';
 import Coaches from './pages/Coaches';
 import Schedule from './pages/Schedule';
 import Navbar from './components/Navbar';
+import ReservationsSchedules from './pages/ReservationsSchedules';
+import MyRoutines from './pages/MyRoutines';
 import GenerarTurnoPage from './pages/GenerarTurnoPage';
 import AdminTurno from './pages/AdminTurno';
 import ProfesionalTurnos from './pages/ProfesionalTurnos';
 import VisualizacionTurno from './pages/VisualizacionTurno';
+import PhysicalRecords from './pages/PhysicalRecords';
 
 export default function AppRoutes() {
   return (
@@ -29,6 +33,10 @@ export default function AppRoutes() {
             <Route path="/user" element={<User />} />
             <Route path="/coaches" element={<Coaches />} />
             <Route path="/schedule" element={<Schedule />} />
+            <Route path="/ReservationsSchedules" element={<ReservationsSchedules />} />
+            <Route path="/CreateRoutine" element={<CreateRoutine />} />
+            <Route path="/MyRoutines" element={<MyRoutines />} />
+            <Route path="/PhysicalRecords" element={<PhysicalRecords />} />
             <Route path="/generar-turno" element={<GenerarTurnoPage />} />
             <Route path="/admin-turno" element={<AdminTurno />} />
             <Route path="/profesional-turnos" element={<ProfesionalTurnos />} />
