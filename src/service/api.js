@@ -115,7 +115,7 @@ class ApiService {
     return response.json();
   }
 
-    static async getMyReservations() {
+  static async getMyReservations() {
     const token = this.getToken();
     const response = await fetch(`${API_BASE_URL}/gym/my-reservations`, {
       method: 'GET',
@@ -336,6 +336,23 @@ class ApiService {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(errorText || 'Error al modificar la capacidad del grupo');
+    }
+    return response.json();
+  }
+
+    // Obtener datos de usuario por userId
+  static async getUserById(userId) {
+    const token = this.getToken();
+    const response = await fetch(`${API_BASE_URL}/user-service/users/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al obtener usuario');
     }
     return response.json();
   }
