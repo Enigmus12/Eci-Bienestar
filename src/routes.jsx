@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 
+
 import Home from './pages/Home';
 import Login from './pages/Login';
 import User from './pages/User';
@@ -16,6 +17,8 @@ import AdminTurno from './pages/AdminTurno';
 import ProfesionalTurnos from './pages/ProfesionalTurnos';
 import VisualizacionTurno from './pages/VisualizacionTurno';
 import PhysicalRecords from './pages/PhysicalRecords';
+import GetRoutines from './pages/GetRoutines';
+import AllPhysicalRecords from './pages/AllPhysicalRecords';
 
 export default function AppRoutes() {
   return (
@@ -41,7 +44,8 @@ export default function AppRoutes() {
             <Route path="/admin-turno" element={<AdminTurno />} />
             <Route path="/profesional-turnos" element={<ProfesionalTurnos />} />
             <Route path="/visualizacion-turno" element={<VisualizacionTurno />} />
-            {/* Agrega más rutas aquí */}
+            <Route path="/getroutines" element={<GetRoutines />} />
+            <Route path="/all-physical-records" element={<AllPhysicalRecords />} />
           </Routes>
         </div>
       </div>

@@ -7,7 +7,7 @@ export default function CreateRoutine() {
   const [description, setDescription] = useState('');
   const [duration, setDuration] = useState('');
   const [frequency, setFrequency] = useState('');
-  const [exercises, setExercises] = useState([{ name: '', reps: '', sets: '' }]);
+  const [exercises, setExercises] = useState([{ name: '', description: '', sets: '', repetitions: '', instructions: '' }]);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
@@ -16,7 +16,7 @@ export default function CreateRoutine() {
   };
 
   const addExercise = () => {
-    setExercises(prev => [...prev, { name: '', reps: '', sets: '' }]);
+    setExercises(prev => [...prev, { name: '', description: '', sets: '', repetitions: '', instructions: '' }]);
   };
 
   const handleSubmit = async (e) => {
@@ -30,7 +30,14 @@ export default function CreateRoutine() {
         description,
         duration,
         frequency,
-        exercises,
+        assignedTrainer: null,
+        exercises: exercises.map(ex => ({
+          name: ex.name,
+          description: ex.description,
+          sets: Number(ex.sets),
+          repetitions: Number(ex.repetitions),
+          instructions: ex.instructions
+        })),
       };
       await ApiService.createRoutine(routineDTO);
       setSuccess('Rutina creada exitosamente');
@@ -51,10 +58,12 @@ export default function CreateRoutine() {
         <div>
           <b>Ejercicios:</b>
           {exercises.map((ex, idx) => (
-            <div key={idx} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
-              <input placeholder="Nombre" value={ex.name} onChange={e => handleExerciseChange(idx, 'name', e.target.value)} required />
-              <input placeholder="Reps" value={ex.reps} onChange={e => handleExerciseChange(idx, 'reps', e.target.value)} required />
-              <input placeholder="Sets" value={ex.sets} onChange={e => handleExerciseChange(idx, 'sets', e.target.value)} required />
+            <div key={idx} style={{ display: 'flex', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+              <input placeholder="Nombre" value={ex.name} onChange={e => handleExerciseChange(idx, 'name', e.target.value)} required style={{ width: 120 }} />
+              <input placeholder="Descripción" value={ex.description} onChange={e => handleExerciseChange(idx, 'description', e.target.value)} style={{ width: 120 }} />
+              <input placeholder="Sets" value={ex.sets} onChange={e => handleExerciseChange(idx, 'sets', e.target.value)} required style={{ width: 60 }} />
+              <input placeholder="Repeticiones" value={ex.repetitions} onChange={e => handleExerciseChange(idx, 'repetitions', e.target.value)} required style={{ width: 90 }} />
+              <input placeholder="Instrucciones" value={ex.instructions} onChange={e => handleExerciseChange(idx, 'instructions', e.target.value)} style={{ width: 140 }} />
             </div>
           ))}
           <button type="button" onClick={addExercise} style={{ marginTop: 6, background: '#990000', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 14px', fontWeight: 600 }}>Agregar ejercicio</button>

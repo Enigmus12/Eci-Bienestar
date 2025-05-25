@@ -18,6 +18,36 @@ class ApiService {
     return this.token;
   }
 
+  // Decodifica un JWT y retorna el payload como objeto
+  static decodeToken() {
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      const payload = token.split('.')[1];
+      const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+      return decoded;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Obtiene el historial físico por userId
+  static async getPhysicalHistoryByUserId(userId) {
+    const token = this.getToken();
+    const response = await fetch(`${API_BASE_URL}/tracking-service/records/userId/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al obtener historial físico');
+    }
+    return response.json();
+  }
+
   static async login(userName, password) {
     const response = await fetch(`${API_BASE_URL}/user-service/login`, {
       method: 'POST',
@@ -103,13 +133,38 @@ class ApiService {
 
   static async createRoutine(routineDTO) {
     const token = this.getToken();
+    // Solo enviar los campos requeridos por el backend
+    const {
+      name,
+      objective,
+      description,
+      duration,
+      frequency,
+      assignedTrainer = null,
+      exercises = []
+    } = routineDTO;
+    const cleanRoutine = {
+      name,
+      objective,
+      description,
+      duration,
+      frequency,
+      assignedTrainer,
+      exercises: exercises.map(ex => ({
+        name: ex.name,
+        description: ex.description,
+        sets: Number(ex.sets),
+        repetitions: Number(ex.repetitions),
+        instructions: ex.instructions
+      }))
+    };
     const response = await fetch(`${API_BASE_URL}/routine-service/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify(routineDTO),
+      body: JSON.stringify(cleanRoutine),
     });
     if (!response.ok) {
       const errorText = await response.text();
@@ -152,7 +207,7 @@ class ApiService {
 
     static async registerAutoPhysicalData(dto) {
     const token = this.getToken();
-    const response = await fetch(`${API_BASE_URL}/records/auto`, {
+    const response = await fetch(`${API_BASE_URL}/tracking-service/records/auto`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -166,6 +221,75 @@ class ApiService {
     }
     return response.json();
   }
+
+    // Obtener todas las rutinas (para Coach)
+  static async getAllRoutines() {
+    const token = this.getToken();
+    const response = await fetch(`${API_BASE_URL}/routine-service/routines`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al obtener rutinas');
+    }
+    return response.json();
+  }
+
+    // Obtener todos los registros físicos (para Coach)
+  static async getAllPhysicalRecords() {
+    const token = this.getToken();
+    const response = await fetch(`${API_BASE_URL}/tracking-service/records`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al obtener registros físicos');
+    }
+    return response.json();
+  }
+
+  // Modificar observaciones y rutina activa de un registro físico
+  static async updatePhysicalRecord(id, recordDTO) {
+    const token = this.getToken();
+    const response = await fetch(`${API_BASE_URL}/tracking-service/records/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(recordDTO),
+    });
+    if (!response.ok && response.status !== 204) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al actualizar el registro');
+    }
+    return true;
+  }
+
+    // Obtener rutina por id
+  static async getRoutineById(id) {
+    const token = this.getToken();
+    const response = await fetch(`${API_BASE_URL}/routine-service/routine/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!response.ok) {
+      return null;
+    }
+    return response.json();
+  }
+
 
 }
 
