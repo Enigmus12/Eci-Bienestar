@@ -1,24 +1,46 @@
+
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../assets/Styles/login.css';
 import BotonRegresar from '../components/BotonRegresar.jsx';
+import ApiService from '../service/api';
 
 export default function Login() {
   const [form, setForm] = useState({ usuario: '', contrasena: '' });
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.usuario || !form.contrasena) {
       setError('Por favor complete todos los campos.');
       return;
     }
     setError('');
-    alert(`Bienvenido, ${form.usuario}`);
+    try {
+      const res = await ApiService.login(form.usuario, form.contrasena);
+      const token = res.token;
+      if (token) {
+        ApiService.setToken(token);
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.role === 'Student') {
+          navigate('/user');
+        } else if (payload.role === 'Coache') {
+          navigate('/coaches');
+        } else {
+          setError('Solo los usuarios con rol Student o Coache pueden ingresar aquí.');
+        }
+      } else {
+        setError('Respuesta inválida del servidor.');
+      }
+    } catch (err) {
+      setError(err.message || 'Error al iniciar sesión');
+    }
   };
 
   const isDisabled = !form.usuario || !form.contrasena;
