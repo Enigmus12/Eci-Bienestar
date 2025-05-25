@@ -1,10 +1,9 @@
-// src/components/TurnoForm.jsx
 import React, { useState } from 'react';
 import "../assets/Styles/form-turno.css";
 import TurnoAsignado from './TurnoAsignado';
 
 export default function TurnoForm() {
-  const [showPrioridadMsg, setShowPrioridadMsg] = useState(false);
+  const [prioridadActiva, setPrioridadActiva] = useState(false);
   const [showAsignado, setShowAsignado] = useState(false);
   const [turnoInfo, setTurnoInfo] = useState({
     turno: '',
@@ -19,10 +18,10 @@ export default function TurnoForm() {
     rol: '',
     especialidad: '',
   });
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handlePrioridad = () => {
-    setShowPrioridadMsg(true);
-    setTimeout(() => setShowPrioridadMsg(false), 2000);
+    setPrioridadActiva(prev => !prev);
   };
 
   const handleChange = (e) => {
@@ -32,7 +31,11 @@ export default function TurnoForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Simulación de asignación de turno
+    if (!form.nombre || !form.documento || !form.rol || !form.especialidad) {
+      setErrorMsg("Por favor, complete todos los campos antes de continuar.");
+      return;
+    }
+    setErrorMsg("");
     setTurnoInfo({
       turno: 'O-69',
       especialidad: form.especialidad || 'Odontología',
@@ -52,15 +55,15 @@ export default function TurnoForm() {
       <div className="form-grid">
         <div className="form-group">
           <label>Nombre completo</label>
-          <input type="text" name="nombre" value={form.nombre} onChange={handleChange} placeholder="Nombre completo" style={{ color: '#111' }} />
+          <input type="text" name="nombre" value={form.nombre} onChange={handleChange} placeholder="Nombre completo" />
         </div>
         <div className="form-group">
           <label>Número de documento</label>
-          <input type="text" name="documento" value={form.documento} onChange={handleChange} placeholder="Número de documento" style={{ color: '#111' }} />
+          <input type="text" name="documento" value={form.documento} onChange={handleChange} placeholder="Número de documento" />
         </div>
         <div className="form-group">
           <label>Rol</label>
-          <select name="rol" value={form.rol} onChange={handleChange} style={{ color: '#111' }}>
+          <select name="rol" value={form.rol} onChange={handleChange}>
             <option value="">Seleccione...</option>
             <option>Estudiante</option>
             <option>Docente</option>
@@ -68,7 +71,7 @@ export default function TurnoForm() {
         </div>
         <div className="form-group">
           <label>Especialidad</label>
-          <select name="especialidad" value={form.especialidad} onChange={handleChange} style={{ color: '#111' }}>
+          <select name="especialidad" value={form.especialidad} onChange={handleChange}>
             <option value="">Seleccione...</option>
             <option>Medicina</option>
             <option>Psicología</option>
@@ -78,16 +81,26 @@ export default function TurnoForm() {
       </div>
 
       <div className="prioridad-btn-wrapper">
-        <button type="button" className="btn-prioridad" onClick={handlePrioridad}>
-          Activar prioridad especial
+        <button
+          type="button"
+          className="btn-prioridad"
+          onClick={handlePrioridad}
+        >
+          {prioridadActiva ? 'Desactivar prioridad especial' : 'Activar prioridad especial'}
         </button>
+
         <p className="texto-prioridad">(discapacidad o embarazo)</p>
-        {showPrioridadMsg && (
-          <div style={{ color: '#fff', background: '#2563eb', borderRadius: 8, padding: '8px 16px', marginTop: 10, fontWeight: 600, textAlign: 'center' }}>
+
+        {prioridadActiva && (
+          <div className="mensaje-prioridad">
             La prioridad ha sido activada
           </div>
         )}
       </div>
+
+      {errorMsg && (
+        <div className="error-msg">{errorMsg}</div>
+      )}
 
       <button type="submit" className="submit-button">
         Solicitar turno

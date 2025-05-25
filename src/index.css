@@ -25,25 +25,8 @@ a:hover {
 body {
   margin: 0;
   font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-  background: #f4f6fa;
+  background: #0b54e7;
   color: #222;
-}
-
-nav {
-  background: #990000 !important;
-  box-shadow: 0 2px 8px #0002;
-}
-
-nav .active {
-  border-bottom: 2px solid #fff;
-}
-
-nav a {
-  transition: color 0.2s;
-}
-
-nav a:hover {
-  color: #ffd700 !important;
 }
 
 nav span {
@@ -63,7 +46,7 @@ button, .btn {
   cursor: pointer;
 }
 button:hover, .btn:hover {
-  background: #000;
+  background: #ffffff;
   color: #e53935;
   box-shadow: 0 4px 16px #0002;
 }
