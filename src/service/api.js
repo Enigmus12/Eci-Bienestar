@@ -1,5 +1,7 @@
-const API_BASE_URL = 'https://seguimientofisicoreservas-c0dhhcgyb0b9atcc.eastus2-01.azurewebsites.net';
-const TURNOS_BASE_URL = import.meta.env.VITE_API_URL;
+// src/service/api.js
+// Clase para manejar peticiones a la API y gestión de token
+
+const API_BASE_URL = 'https://seguimientofisicoreservas-c0dhhcgyb0b9atcc.eastus2-01.azurewebsites.net'; 
 
 class ApiService {
   static token = null;
@@ -16,6 +18,7 @@ class ApiService {
     return this.token;
   }
 
+  // Decodifica un JWT y retorna el payload como objeto
   static decodeToken() {
     const token = this.getToken();
     if (!token) return null;
@@ -28,19 +31,42 @@ class ApiService {
     }
   }
 
+  // Obtiene el historial físico por userId
+  static async getPhysicalHistoryByUserId(userId) {
+    const token = this.getToken();
+    const response = await fetch(`${API_BASE_URL}/tracking-service/records/userId/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al obtener historial físico');
+    }
+    return response.json();
+  }
+
   static async login(userName, password) {
     const response = await fetch(`${API_BASE_URL}/user-service/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ userName, password }),
     });
-    if (!response.ok) throw new Error('Credenciales incorrectas');
+    if (!response.ok) {
+      throw new Error('Credenciales incorrectas');
+    }
     const data = await response.json();
-    if (data && data.token) this.setToken(data.token);
+    if (data && data.token) {
+      this.setToken(data.token);
+    }
     return data;
   }
 
-  static async createSemestralSchedule(dto) {
+  static async createSemestralSchedule(gymSchedulesDTO) {
     const token = this.getToken();
     const response = await fetch(`${API_BASE_URL}/gym-schedules/create-semestral`, {
       method: 'POST',
@@ -48,13 +74,16 @@ class ApiService {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify(dto),
+      body: JSON.stringify(gymSchedulesDTO),
     });
-    if (!response.ok) throw new Error(await response.text() || 'Error al crear el horario');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al crear el horario');
+    }
     return response.json();
   }
 
-  static async reserveGymGroup(scheduleGroupId) {
+    static async reserveGymGroup(scheduleGroupId) {
     const token = this.getToken();
     const response = await fetch(`${API_BASE_URL}/gym/reserve-group/${scheduleGroupId}`, {
       method: 'POST',
@@ -63,11 +92,14 @@ class ApiService {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     });
-    if (!response.ok) throw new Error(await response.text() || 'Error al reservar grupo');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al reservar grupo');
+    }
     return response.json();
   }
 
-  static async getAllSchedules() {
+    static async getAllSchedules() {
     const token = this.getToken();
     const response = await fetch(`${API_BASE_URL}/gym-schedules`, {
       method: 'GET',
@@ -76,11 +108,14 @@ class ApiService {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     });
-    if (!response.ok) throw new Error(await response.text() || 'Error al obtener los horarios');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al obtener los horarios');
+    }
     return response.json();
   }
 
-  static async getMyReservations() {
+    static async getMyReservations() {
     const token = this.getToken();
     const response = await fetch(`${API_BASE_URL}/gym/my-reservations`, {
       method: 'GET',
@@ -89,16 +124,25 @@ class ApiService {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     });
-    if (!response.ok) throw new Error(await response.text() || 'Error al obtener reservas');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al obtener reservas');
+    }
     return response.json();
   }
 
-  static async createRoutine(dto) {
+  static async createRoutine(routineDTO) {
     const token = this.getToken();
+    // Solo enviar los campos requeridos por el backend
     const {
-      name, objective, description, duration, frequency, assignedTrainer = null, exercises = []
-    } = dto;
-
+      name,
+      objective,
+      description,
+      duration,
+      frequency,
+      assignedTrainer = null,
+      exercises = []
+    } = routineDTO;
     const cleanRoutine = {
       name,
       objective,
@@ -114,7 +158,6 @@ class ApiService {
         instructions: ex.instructions
       }))
     };
-
     const response = await fetch(`${API_BASE_URL}/routine-service/create`, {
       method: 'POST',
       headers: {
@@ -123,11 +166,14 @@ class ApiService {
       },
       body: JSON.stringify(cleanRoutine),
     });
-    if (!response.ok) throw new Error(await response.text() || 'Error al crear rutina');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al crear rutina');
+    }
     return response.json();
   }
 
-  static async getMyRoutines() {
+    static async getMyRoutines() {
     const token = this.getToken();
     const response = await fetch(`${API_BASE_URL}/routine/my-routines`, {
       method: 'GET',
@@ -136,7 +182,10 @@ class ApiService {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     });
-    if (!response.ok) throw new Error(await response.text() || 'Error al obtener rutinas');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al obtener rutinas');
+    }
     return response.json();
   }
 
@@ -149,13 +198,16 @@ class ApiService {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     });
-    if (!response.ok && response.status !== 204) throw new Error(await response.text() || 'Error al eliminar rutina');
+    if (!response.ok && response.status !== 204) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al eliminar rutina');
+    }
     return true;
   }
 
-  static async registerAutoPhysicalData(dto) {
+    static async registerAutoPhysicalData(dto) {
     const token = this.getToken();
-    const response = await fetch(`${API_BASE_URL}/records/auto`, {
+    const response = await fetch(`${API_BASE_URL}/tracking-service/records/auto`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -163,10 +215,14 @@ class ApiService {
       },
       body: JSON.stringify(dto),
     });
-    if (!response.ok) throw new Error(await response.text() || 'Error al registrar datos físicos');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al registrar datos físicos');
+    }
     return response.json();
   }
 
+    // Obtener todas las rutinas (para Coach)
   static async getAllRoutines() {
     const token = this.getToken();
     const response = await fetch(`${API_BASE_URL}/routine-service/routines`, {
@@ -176,10 +232,14 @@ class ApiService {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     });
-    if (!response.ok) throw new Error(await response.text() || 'Error al obtener rutinas');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al obtener rutinas');
+    }
     return response.json();
   }
 
+    // Obtener todos los registros físicos (para Coach)
   static async getAllPhysicalRecords() {
     const token = this.getToken();
     const response = await fetch(`${API_BASE_URL}/tracking-service/records`, {
@@ -189,10 +249,14 @@ class ApiService {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     });
-    if (!response.ok) throw new Error(await response.text() || 'Error al obtener registros físicos');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al obtener registros físicos');
+    }
     return response.json();
   }
 
+  // Modificar observaciones y rutina activa de un registro físico
   static async updatePhysicalRecord(id, recordDTO) {
     const token = this.getToken();
     const response = await fetch(`${API_BASE_URL}/tracking-service/records/${id}`, {
@@ -203,10 +267,14 @@ class ApiService {
       },
       body: JSON.stringify(recordDTO),
     });
-    if (!response.ok && response.status !== 204) throw new Error(await response.text() || 'Error al actualizar el registro');
+    if (!response.ok && response.status !== 204) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al actualizar el registro');
+    }
     return true;
   }
 
+    // Obtener rutina por id
   static async getRoutineById(id) {
     const token = this.getToken();
     const response = await fetch(`${API_BASE_URL}/routine-service/routine/${id}`, {
@@ -216,11 +284,13 @@ class ApiService {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     });
-    if (!response.ok) return null;
+    if (!response.ok) {
+      return null;
+    }
     return response.json();
   }
 
-  
+
 }
 
 export default ApiService;
