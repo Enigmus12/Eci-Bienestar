@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../assets/Styles/login.css';
@@ -55,7 +54,7 @@ export default function Login() {
 
         {/* Imagen del logo institucional */}
         <img
-          src="/src/assets/resourses/LOGO.png"
+          src="/public/resourses/LOGO.png"
           alt="Logo Institucional"
           style={{ width: 120, marginBottom: 16 }}
         />

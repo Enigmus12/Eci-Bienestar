@@ -9,12 +9,10 @@ export default function TurnoForm() {
   const [turnoInfo, setTurnoInfo] = useState({
     turno: '',
     especialidad: '',
-    nombre: '',
     documento: '',
     rol: '',
   });
   const [form, setForm] = useState({
-    nombre: '',
     documento: '',
     rol: '',
     especialidad: '',
@@ -34,7 +32,6 @@ export default function TurnoForm() {
     e.preventDefault();
 
     if (
-      form.nombre.trim() === '' ||
       form.documento.trim() === '' ||
       form.rol.trim() === '' ||
       form.especialidad.trim() === ''
@@ -76,7 +73,6 @@ export default function TurnoForm() {
       setTurnoInfo({
         turno: turnoMasReciente.turnCode,
         especialidad: turnoMasReciente.specialty,
-        nombre: form.nombre,
         documento: form.documento,
         rol: form.rol,
       });
@@ -95,10 +91,6 @@ export default function TurnoForm() {
   return (
     <form className="form-turno" onSubmit={handleSubmit}>
       <div className="form-grid">
-        <div className="form-group">
-          <label>Nombre completo</label>
-          <input type="text" name="nombre" value={form.nombre} onChange={handleChange} placeholder="Nombre completo" />
-        </div>
         <div className="form-group">
           <label>Número de documento</label>
           <input type="text" name="documento" value={form.documento} onChange={handleChange} placeholder="Número de documento" />

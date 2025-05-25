@@ -1,32 +1,49 @@
-import React, { useState } from 'react';
-import '../assets/Styles/VisualizacionTurno.css'; // Corregida la ruta
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import '../assets/Styles/VisualizacionTurno.css';
 import BotonRegresar from '../components/BotonRegresar';
 
-const usuarioMock = {
-  nombre: 'Carlos Alberto Rodríguez',
-  turno: 'P-23',
-  especialidad: 'Psicología',
-  hora: '10:00',
-};
-
-const proximosTurnosMock = [
-  { turno: 'M-42', nombre: 'Ana Sofía Martínez', especialidad: 'Medicina General', prioridad: 'Prioritario' },
-  { turno: 'M-43', nombre: 'Luis Fernando Gómez', especialidad: 'Odontología', prioridad: 'Normal' },
-];
+const API_BASE_URL = "https://shiftmanager-hrbgeaamdmg6ehb5.canadacentral-01.azurewebsites.net/api";
 
 export default function VisualizacionTurno() {
-  const [turnoActual, setTurnoActual] = useState(usuarioMock);
-  const [colaTurnos, setColaTurnos] = useState(proximosTurnosMock);
+  const [turnoActual, setTurnoActual] = useState(null);
+  const [colaTurnos, setColaTurnos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchTurnos = async () => {
+      try {
+        const { data } = await axios.get(`${API_BASE_URL}/shifts`);
+        // Filtrar turnos activos y ordenarlos por prioridad y/o llegada
+        const activos = data.filter(t => t.status === "IN_PROGRESS" || t.status === "ASSIGNED");
+        if (activos.length > 0) {
+          setTurnoActual(activos[0]);
+          setColaTurnos(activos.slice(1, 4)); // Solo los siguientes 3 turnos
+        } else {
+          setTurnoActual(null);
+          setColaTurnos([]);
+        }
+      } catch (err) {
+        setError("No se pudieron cargar los turnos");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTurnos();
+  }, []);
 
   const manejarSiguienteTurno = () => {
     if (colaTurnos.length > 0) {
-      const siguienteTurno = colaTurnos[0];
-      setTurnoActual(siguienteTurno);
+      setTurnoActual(colaTurnos[0]);
       setColaTurnos(colaTurnos.slice(1));
     } else {
       alert('No hay más turnos en la cola.');
     }
   };
+
+  if (loading) return <div className="visualizacion-turno">Cargando turnos...</div>;
+  if (error) return <div className="visualizacion-turno">{error}</div>;
 
   return (
     <div className="visualizacion-turno">
@@ -34,38 +51,33 @@ export default function VisualizacionTurno() {
         <h1>SISTEMA DE TURNOS MÉDICOS</h1>
         <h2>Universidad - Servicios de Bienestar</h2>
       </header>
-
       <main className="main-content">
         <div className="content-wrapper">
           <section className="turno-actual">
             <div className="turno-card">
-              <div className="turno">{turnoActual.turno}</div>
-              <div className="especialidad">{turnoActual.especialidad}</div>
-              <div className="nombre">{turnoActual.nombre}</div>
-              <div className="hora">Hora programada: {turnoActual.hora}</div>
+              <div className="turno">{turnoActual ? turnoActual.turnCode : '-'}</div>
+              <div className="especialidad">{turnoActual ? turnoActual.specialty : '-'}</div>
+              <div className="nombre">{turnoActual ? turnoActual.userId : '-'}</div>
+              <div className="hora">{turnoActual && turnoActual.createdAt ? `Hora registro: ${new Date(turnoActual.createdAt + 'Z').toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}` : ''}</div>
             </div>
-            {/* Botón SIGUIENTE TURNO eliminado */}
           </section>
-
           <section className="proximos-turnos">
             <h3>Próximos Turnos</h3>
             <ul>
               {colaTurnos.map((turno, index) => (
-                <li key={index} className={`turno-item ${turno.prioridad.toLowerCase()}`}>
-                  <div className="turno">{turno.turno}</div>
-                  <div className="nombre">{turno.nombre}</div>
-                  <div className="especialidad">{turno.especialidad}</div>
-                  <div className="prioridad">{turno.prioridad}</div>
+                <li key={index} className={`turno-item ${turno.specialPriority ? 'prioritario' : 'normal'}`}>
+                  <div className="turno">{turno.turnCode}</div>
+                  <div className="nombre">{turno.userId}</div>
+                  <div className="especialidad">{turno.specialty}</div>
+                  <div className="prioridad">{turno.specialPriority ? 'Prioritario' : 'Normal'}</div>
                 </li>
               ))}
             </ul>
           </section>
         </div>
-
         <aside className="panel-multimedia">
-
           <video width="100%" autoPlay loop muted controls>
-            <source src="/src/assets/resourses/video1.mp4" type="video/mp4" />
+            <source src="/public/resourses/video1.mp4" type="video/mp4" />
             Tu navegador no soporta la reproducción de video.
           </video>
         </aside>
