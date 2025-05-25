@@ -86,8 +86,8 @@ export default function AdminTurno() {
       <table style={{ width: '100%', maxWidth: 1000, margin: '0 auto', borderCollapse: 'collapse', marginTop: 16 }}>
         <thead>
           <tr style={{ background: '#900', color: '#fff', fontSize: 18 }}>
-            <th style={{ padding: 10 }}>Nombre Completo</th>
-            <th>Número de Documento</th>
+            {/* <th style={{ padding: 10 }}>Nombre Completo</th> */}
+            <th style={{ padding: 10 }}>Número de Documento</th>
             <th>Rol</th>
             <th>Especialidad</th>
             <th>Prioridad</th>
@@ -99,19 +99,19 @@ export default function AdminTurno() {
             ? Object.values(turnosPorEspecialidad).flat()
             : (turnosPorEspecialidad[especialidadSeleccionada] || [])
           ).length === 0 ? (
-            <tr><td colSpan={6} style={{ textAlign: 'center', padding: 16, color: '#888' }}>No hay turnos para esta especialidad.</td></tr>
+            <tr><td colSpan={5} style={{ textAlign: 'center', padding: 16, color: '#888' }}>No hay turnos para esta especialidad.</td></tr>
           ) : (
             (especialidadSeleccionada === 'Todos'
               ? Object.values(turnosPorEspecialidad).flat()
               : (turnosPorEspecialidad[especialidadSeleccionada] || [])
             ).map((turno, idx) => (
               <tr key={idx} style={{ background: idx % 2 ? '#fff' : '#f5f5f5', fontSize: 16 }}>
-                <td style={{ padding: 10 }}>{turno.nombre}</td>
-                <td>{turno.documento}</td>
-                <td>{turno.rol}</td>
-                <td>{turno.especialidad}</td>
-                <td>{turno.prioridad}</td>
-                <td>{turno.numero}</td>
+                {/* <td style={{ padding: 10 }}>{turno.nombre || '-'}</td> */}
+                <td>{turno.userId || turno.documento || '-'}</td>
+                <td>{turno.rol || '-'}</td>
+                <td>{turno.specialty || '-'}</td>
+                <td>{turno.specialPriority ? 'Prioritario' : (turno.prioridad || 'Normal')}</td>
+                <td>{turno.turnCode || turno.numero || '-'}</td>
               </tr>
             ))
           )}

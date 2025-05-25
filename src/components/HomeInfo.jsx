@@ -20,7 +20,7 @@ export default function HomeInfo() {
         </button>
       </div>
       <div className="quienes-somos-imagen">
-        <img src="/src/assets/resourses/LogoEscuela.jpg" alt="Bienestar ECI" />
+        <img src="/public/resourses/LogoEscuela.jpg" alt="Bienestar ECI" />
       </div>
     </div>
   );

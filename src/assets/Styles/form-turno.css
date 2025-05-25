@@ -9,6 +9,19 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+.form-turno input,
+.form-turno select,
+.form-turno textarea {
+  background: #fff;
+  color: #111;
+  border: 1px solid #ccc;
+}
+
+.form-turno input::placeholder,
+.form-turno textarea::placeholder {
+  color: #888;
+}
+
 /* Grid de dos columnas para PC */
 .form-grid {
   display: grid;
