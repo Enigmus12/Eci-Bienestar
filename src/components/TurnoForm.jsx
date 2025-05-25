@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import "../assets/Styles/form-turno.css";
 import TurnoAsignado from './TurnoAsignado';
-import ApiService from '../service/api';
+import ApiService from '../service/apiM1';
 
 export default function TurnoForm() {
   const [prioridadActiva, setPrioridadActiva] = useState(false);
@@ -115,8 +115,8 @@ export default function TurnoForm() {
           <label>Especialidad</label>
           <select name="especialidad" value={form.especialidad} onChange={handleChange}>
             <option value="">Seleccione...</option>
-            <option>Medicina</option>
-            <option>Psicología</option>
+            <option>Medicina General</option>
+            <option>Psicologia</option>
             <option>Odontología</option>
           </select>
         </div>

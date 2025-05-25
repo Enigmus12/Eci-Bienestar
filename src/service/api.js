@@ -1,6 +1,3 @@
-// src/service/api.js
-// Clase para manejar peticiones a la API y gestión de token
-
 const API_BASE_URL = 'https://seguimientofisicoreservas-c0dhhcgyb0b9atcc.eastus2-01.azurewebsites.net';
 const TURNOS_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -19,8 +16,6 @@ class ApiService {
     return this.token;
   }
 
-<<<<<<< Updated upstream
-=======
   static decodeToken() {
     const token = this.getToken();
     if (!token) return null;
@@ -33,20 +28,6 @@ class ApiService {
     }
   }
 
-  static async getPhysicalHistoryByUserId(userId) {
-    const token = this.getToken();
-    const response = await fetch(`${API_BASE_URL}/tracking-service/records/userId/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    });
-    if (!response.ok) throw new Error(await response.text() || 'Error al obtener historial físico');
-    return response.json();
-  }
-
->>>>>>> Stashed changes
   static async login(userName, password) {
     const response = await fetch(`${API_BASE_URL}/user-service/login`, {
       method: 'POST',
@@ -114,8 +95,6 @@ class ApiService {
 
   static async createRoutine(dto) {
     const token = this.getToken();
-<<<<<<< Updated upstream
-=======
     const {
       name, objective, description, duration, frequency, assignedTrainer = null, exercises = []
     } = dto;
@@ -136,14 +115,13 @@ class ApiService {
       }))
     };
 
->>>>>>> Stashed changes
     const response = await fetch(`${API_BASE_URL}/routine-service/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify(routineDTO),
+      body: JSON.stringify(cleanRoutine),
     });
     if (!response.ok) throw new Error(await response.text() || 'Error al crear rutina');
     return response.json();
@@ -189,8 +167,6 @@ class ApiService {
     return response.json();
   }
 
-<<<<<<< Updated upstream
-=======
   static async getAllRoutines() {
     const token = this.getToken();
     const response = await fetch(`${API_BASE_URL}/routine-service/routines`, {
@@ -244,46 +220,7 @@ class ApiService {
     return response.json();
   }
 
-  // 👇 NUEVOS MÉTODOS PARA GESTIÓN DE TURNOS
-
-static async createTurno(dto) {
-  const response = await fetch(`${TURNOS_BASE_URL}/api/shifts`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(dto),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || 'Error al crear turno');
-  }
-
-  const contentType = response.headers.get("content-type");
-  if (contentType && contentType.includes("application/json")) {
-    return response.json(); // ✅ Asegura que turnoCreado tenga turnCode
-  } else {
-    return { message: await response.text() }; // ⚠️ Esto no sirve para setTurnoInfo
-  }
->>>>>>> Stashed changes
-}
-
-  static async getTurnos() {
-    const response = await fetch(`${TURNOS_BASE_URL}/api/shifts`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    if (!response.ok) throw new Error(await response.text() || 'Error al obtener turnos');
-    return response.json();
-  }
   
-  static async getShiftsByUserId(userId) {
-    const response = await fetch(`${TURNOS_BASE_URL}/api/shifts/user/${userId}`);
-    if (!response.ok) throw new Error("No se pudo obtener los turnos del usuario");
-    return response.json();
-  }
 }
+
 export default ApiService;
