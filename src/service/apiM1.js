@@ -55,6 +55,20 @@ class ApiService {
       throw new Error(error.response?.data || 'No se pudo obtener el usuario');
     }
   }
+
+  // Actualizar estado de un turno por turnCode
+  static async updateTurnStatus(turnCode, status) {
+    try {
+      const response = await axios.put(
+        `${TURNOS_BASE_URL}/${turnCode}`,
+        { status },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data || 'No se pudo actualizar el estado del turno');
+    }
+  }
 }
 
 export default ApiService;

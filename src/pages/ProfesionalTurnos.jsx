@@ -40,9 +40,16 @@ export default function ProfesionalTurnos() {
 
   const turnoActual = turnosFiltrados.length > 0 ? turnosFiltrados[0] : null;
 
-  const handleLlamarSiguiente = () => {
+  const handleLlamarSiguiente = async () => {
     if (turnosFiltrados.length > 0) {
-      setTurnos(prev => prev.filter(t => t.turnCode !== turnosFiltrados[0].turnCode));
+      const turnoActual = turnosFiltrados[0];
+      // Cambiar el estado del turno actual a 'ATTENDED' en el backend
+      try {
+        await ApiService.updateTurnStatus(turnoActual.turnCode, 'ATTENDED');
+      } catch (e) {}
+      setTurnos(prev => prev.map(t =>
+        t.turnCode === turnoActual.turnCode ? { ...t, status: 'ATTENDED' } : t
+      ).filter(t => t.turnCode !== turnoActual.turnCode));
     }
   };
 
@@ -53,6 +60,19 @@ export default function ProfesionalTurnos() {
   const handleCancelar = (turnCode) => {
     setTurnos(prev => prev.filter(t => t.turnCode !== turnCode));
   };
+
+  // Cuando se muestra el turno actual, si no está en IN_PROGRESS, actualizarlo
+  useEffect(() => {
+    if (turnoActual && turnoActual.status !== 'IN_PROGRESS') {
+      ApiService.updateTurnStatus(turnoActual.turnCode, 'IN_PROGRESS')
+        .then(() => {
+          setTurnos(prev => prev.map(t =>
+            t.turnCode === turnoActual.turnCode ? { ...t, status: 'IN_PROGRESS' } : t
+          ));
+        })
+        .catch(() => {});
+    }
+  }, [turnoActual]);
 
   return (
     <div style={{ padding: '32px 0', background: '#f7f8fa', minHeight: '100vh' }}>
