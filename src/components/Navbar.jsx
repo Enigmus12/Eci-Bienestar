@@ -1,10 +1,29 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import ApiService from '../service/api';
 import '../assets/Styles/navbar.css';
+
+function getUserRole() {
+  try {
+    const token = ApiService.getToken && ApiService.getToken();
+    if (!token) return null;
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.role;
+  } catch {
+    return null;
+  }
+}
 
 export default function Navbar() {
   const location = useLocation();
   const isLoginPage = location.pathname === "/login";
+  const navigate = useNavigate();
+  const role = getUserRole();
+
+  const handleLogout = () => {
+    ApiService.removeToken && ApiService.removeToken();
+    navigate('/');
+  };
 
   return (
     <nav className="navbar">
@@ -18,11 +37,17 @@ export default function Navbar() {
 
       {!isLoginPage && (
         <div className="navbar-right">
-          <Link to="/login">
-            <button className="navbar-login-btn">
-              Login
+          {role === 'Admin' ? (
+            <button className="navbar-login-btn" onClick={handleLogout}>
+              Salida Segura
             </button>
-          </Link>
+          ) : (
+            <Link to="/login">
+              <button className="navbar-login-btn">
+                Login
+              </button>
+            </Link>
+          )}
         </div>
       )}
     </nav>

@@ -27,12 +27,14 @@ export default function Login() {
       if (token) {
         ApiService.setToken(token);
         const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.role === 'Student') {
+        if (payload.role === 'Admin') {
+          navigate('/admin-turno');
+        } else if (payload.role === 'Student') {
           navigate('/user');
         } else if (payload.role === 'Coache') {
           navigate('/coaches');
         } else {
-          setError('Solo los usuarios con rol Student o Coache pueden ingresar aquí.');
+          setError('Solo los usuarios con rol Admin, Student o Coache pueden ingresar aquí.');
         }
       } else {
         setError('Respuesta inválida del servidor.');
