@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ApiService from '../service/api';
 import Button from '../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
@@ -12,8 +12,26 @@ export default function Schedule() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [mensaje, setMensaje] = useState('');
+  const [hasSchedule, setHasSchedule] = useState(false);
 
   const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
+
+  useEffect(() => {
+    async function checkSchedules() {
+      try {
+        const schedules = await ApiService.getAllSchedules();
+        if (schedules && schedules.length > 0) {
+          setHasSchedule(true);
+        } else {
+          setHasSchedule(false);
+        }
+      } catch (err) {
+        // Si hay error, asumimos que no hay horarios
+        setHasSchedule(false);
+      }
+    }
+    checkSchedules();
+  }, []);
 
   // Solo permite seleccionar hasta 3 días
   const handleDayCheck = (day, checked) => {
@@ -49,6 +67,10 @@ export default function Schedule() {
       setError('Debes seleccionar exactamente 3 días.');
       return;
     }
+    if (!hasSchedule && (!startDate || !endDate)) {
+      setError('Debes ingresar la fecha de inicio y fin.');
+      return;
+    }
     try {
       // Convertir los horarios a formato LocalTime (HH:mm:ss)
       const formattedDayTimeMap = {};
@@ -59,8 +81,7 @@ export default function Schedule() {
         ];
       }
       const dto = {
-        startDate,
-        endDate,
+        ...(hasSchedule ? {} : { startDate, endDate }),
         dayTimeMap: formattedDayTimeMap,
         capacity: Number(capacity),
       };
@@ -83,14 +104,18 @@ export default function Schedule() {
       </div>
       <h2>Crear Horarios</h2>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 24 }}>
-        <div>
-          <label>Fecha inicio: </label>
-          <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required />
-        </div>
-        <div>
-          <label>Fecha fin: </label>
-          <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} required />
-        </div>
+        {!hasSchedule && (
+          <>
+            <div>
+              <label>Fecha inicio: </label>
+              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required />
+            </div>
+            <div>
+              <label>Fecha fin: </label>
+              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} required />
+            </div>
+          </>
+        )}
         <div>
           <label>Capacidad: </label>
           <input type="number" min={1} value={capacity} onChange={e => setCapacity(e.target.value)} required />
