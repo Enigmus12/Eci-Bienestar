@@ -34,6 +34,16 @@ class ApiService {
       throw new Error(error.response?.data || 'No se pudo obtener los turnos del usuario');
     }
   }
+
+  // Eliminar turno por turnCode
+  static async deleteTurnByCode(turnCode) {
+    try {
+      const response = await axios.delete(`${TURNOS_BASE_URL}/turnCode/${turnCode}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data || 'No se pudo eliminar el turno');
+    }
+  }
 }
 
 export default ApiService;

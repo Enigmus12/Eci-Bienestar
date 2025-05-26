@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import ApiService from '../service/apiM1';
 
 const especialidadesIniciales = [
   { nombre: 'Medicina General', disponible: true },
@@ -6,28 +7,77 @@ const especialidadesIniciales = [
   { nombre: 'Odontología', disponible: true },
 ];
 
-const turnosPorEspecialidad = {
-  'Psicología': [
-    {
-      nombre: 'Ana Gómez',
-      documento: '87654321',
-      rol: 'Docente',
-      especialidad: 'Psicología',
-      prioridad: 'Media',
-      numero: 2,
-    },
-  ],
-  'Medicina General': [],
-  'Odontología': [],
+// Inicializar especialidades desde localStorage si existe
+const getEspecialidadesInicial = () => {
+  const saved = localStorage.getItem('especialidadesDisponibles');
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch {
+      return especialidadesIniciales;
+    }
+  }
+  return especialidadesIniciales;
 };
 
 export default function AdminTurno() {
-  const [especialidades, setEspecialidades] = useState(especialidadesIniciales);
+  const [especialidades, setEspecialidades] = useState(getEspecialidadesInicial);
   const [especialidadSeleccionada, setEspecialidadSeleccionada] = useState('Todos');
+  const [turnos, setTurnos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchTurnos = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const data = await ApiService.getTurnos();
+        setTurnos(data);
+      } catch (err) {
+        setError('No se pudieron cargar los turnos');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTurnos();
+  }, []);
+
+  // Guardar y cargar disponibilidad de especialidades en localStorage
+  useEffect(() => {
+    localStorage.setItem('especialidadesDisponibles', JSON.stringify(especialidades));
+  }, [especialidades]);
 
   const handleDisponibilidad = (index, disponible) => {
     setEspecialidades(prev => prev.map((esp, i) => i === index ? { ...esp, disponible } : esp));
   };
+
+  // Eliminar turno por turnCode
+  const handleEliminarTurno = async (turnCode) => {
+    if (!turnCode) {
+      setError('No se pudo eliminar el turno: código de turno inválido');
+      return;
+    }
+    if (!window.confirm('¿Seguro que deseas eliminar este turno?')) return;
+    setLoading(true);
+    setError('');
+    try {
+      await ApiService.deleteTurnByCode(turnCode);
+      setTurnos(prev => prev.filter(t => t.turnCode !== turnCode));
+    } catch (err) {
+      setError('No se pudo eliminar el turno');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Agrupar turnos por especialidad
+  const turnosPorEspecialidad = turnos.reduce((acc, turno) => {
+    const esp = turno.especialidad || turno.specialty || 'Sin Especialidad';
+    if (!acc[esp]) acc[esp] = [];
+    acc[esp].push(turno);
+    return acc;
+  }, {});
 
   return (
     <div style={{ background: '#fafafa', minHeight: '100vh', padding: 32 }}>
@@ -77,46 +127,60 @@ export default function AdminTurno() {
           style={{ fontSize: 18, padding: '8px 16px', borderRadius: 6, border: '1px solid #888', minWidth: 200 }}
         >
           <option value="Todos">Todos</option>
-          {especialidades.map(esp => (
-            <option key={esp.nombre} value={esp.nombre}>{esp.nombre}</option>
+          {Object.keys(turnosPorEspecialidad).map(esp => (
+            <option key={esp} value={esp}>{esp}</option>
           ))}
         </select>
       </div>
 
-      <table style={{ width: '100%', maxWidth: 1000, margin: '0 auto', borderCollapse: 'collapse', marginTop: 16 }}>
-        <thead>
-          <tr style={{ background: '#900', color: '#fff', fontSize: 18 }}>
-            {/* <th style={{ padding: 10 }}>Nombre Completo</th> */}
-            <th style={{ padding: 10 }}>Número de Documento</th>
-            <th>Rol</th>
-            <th>Especialidad</th>
-            <th>Prioridad</th>
-            <th>Número de Turno</th>
-          </tr>
-        </thead>
-        <tbody>
-          {(especialidadSeleccionada === 'Todos'
-            ? Object.values(turnosPorEspecialidad).flat()
-            : (turnosPorEspecialidad[especialidadSeleccionada] || [])
-          ).length === 0 ? (
-            <tr><td colSpan={5} style={{ textAlign: 'center', padding: 16, color: '#888' }}>No hay turnos para esta especialidad.</td></tr>
-          ) : (
-            (especialidadSeleccionada === 'Todos'
+      {loading ? (
+        <div style={{ textAlign: 'center', color: '#990000', fontWeight: 600, fontSize: 20 }}>Cargando turnos...</div>
+      ) : error ? (
+        <div style={{ textAlign: 'center', color: '#990000', fontWeight: 600, fontSize: 20 }}>{error}</div>
+      ) : (
+        <table style={{ width: '100%', maxWidth: 1000, margin: '0 auto', borderCollapse: 'collapse', marginTop: 16 }}>
+          <thead>
+            <tr style={{ background: '#900', color: '#fff', fontSize: 18 }}>
+              <th style={{ padding: 10 }}>Número de Documento</th>
+              <th>Nombre</th>
+              <th>Rol</th>
+              <th>Especialidad</th>
+              <th>Prioridad</th>
+              <th>Número de Turno</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(especialidadSeleccionada === 'Todos'
               ? Object.values(turnosPorEspecialidad).flat()
               : (turnosPorEspecialidad[especialidadSeleccionada] || [])
-            ).map((turno, idx) => (
-              <tr key={idx} style={{ background: idx % 2 ? '#fff' : '#f5f5f5', fontSize: 16 }}>
-                {/* <td style={{ padding: 10 }}>{turno.nombre || '-'}</td> */}
-                <td>{turno.userId || turno.documento || '-'}</td>
-                <td>{turno.rol || '-'}</td>
-                <td>{turno.specialty || '-'}</td>
-                <td>{turno.specialPriority ? 'Prioritario' : (turno.prioridad || 'Normal')}</td>
-                <td>{turno.turnCode || turno.numero || '-'}</td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ).length === 0 ? (
+              <tr><td colSpan={8} style={{ textAlign: 'center', padding: 16, color: '#888' }}>No hay turnos para esta especialidad.</td></tr>
+            ) : (
+              (especialidadSeleccionada === 'Todos'
+                ? Object.values(turnosPorEspecialidad).flat()
+                : (turnosPorEspecialidad[especialidadSeleccionada] || [])
+              ).map((turno, idx) => (
+                <tr key={turno.id || turno.numero || idx} style={{ background: idx % 2 ? '#fff' : '#f5f5f5', fontSize: 16 }}>
+                  <td>{turno.userId || turno.documento || '-'}</td>
+                  <td>{turno.nombre && turno.nombre !== '-' ? turno.nombre : (turno.name && turno.name !== '-' ? turno.name : 'Sin nombre')}</td>
+                  <td>{turno.rol && turno.rol !== '-' ? turno.rol : (turno.role && turno.role !== '-' ? turno.role : 'Sin rol')}</td>
+                  <td>{turno.especialidad || turno.specialty || '-'}</td>
+                  <td>{turno.specialPriority ? 'Prioritario' : (turno.prioridad || 'Normal')}</td>
+                  <td>{turno.numero || turno.turnCode || '-'}</td>
+                  <td>{turno.status || '-'}</td>
+                  <td>
+                    <button onClick={() => handleEliminarTurno(turno.numero || turno.turnCode)} style={{ background: '#d32f2f', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 16px', fontWeight: 600, cursor: 'pointer' }} disabled={!(turno.numero || turno.turnCode)}>
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

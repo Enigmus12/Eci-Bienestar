@@ -19,6 +19,27 @@ export default function TurnoForm() {
   });
   const [errorMsg, setErrorMsg] = useState("");
 
+  // Obtener especialidades habilitadas desde localStorage
+  const especialidadesDisponibles = (() => {
+    const saved = localStorage.getItem('especialidadesDisponibles');
+    if (saved) {
+      try {
+        return JSON.parse(saved).filter(e => e.disponible).map(e => e.nombre);
+      } catch {
+        return [
+          'Medicina General',
+          'Psicologia',
+          'Odontología'
+        ];
+      }
+    }
+    return [
+      'Medicina General',
+      'Psicologia',
+      'Odontología'
+    ];
+  })();
+
   const handlePrioridad = () => {
     setPrioridadActiva(prev => !prev);
   };
@@ -105,9 +126,9 @@ export default function TurnoForm() {
           <label>Especialidad</label>
           <select name="especialidad" value={form.especialidad} onChange={handleChange}>
             <option value="">Seleccione...</option>
-            <option>Medicina General</option>
-            <option>Psicologia</option>
-            <option>Odontología</option>
+            {especialidadesDisponibles.map(esp => (
+              <option key={esp} value={esp}>{esp}</option>
+            ))}
           </select>
         </div>
       </div>
