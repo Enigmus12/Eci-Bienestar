@@ -1,6 +1,8 @@
 
 import React, { useEffect, useState } from 'react';
 import ApiService from '../service/api';
+import Button from '../components/ui/Button';
+import { useNavigate } from 'react-router-dom';
 
 function RoutineDetail({ routineId }) {
   const [routine, setRoutine] = useState(null);
@@ -39,6 +41,7 @@ function RoutineDetail({ routineId }) {
   );
 }
 export default function AllPhysicalRecords() {
+  const navigate = useNavigate();
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -99,6 +102,11 @@ export default function AllPhysicalRecords() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: 900, margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '1rem' }}>
+        <Button onClick={() => navigate('/coaches')} variant="outline">
+          <span style={{ fontSize: '18px', marginRight: 6 }}>←</span> Volver al inicio
+        </Button>
+      </div>
       <h2>Todos los Registros Físicos</h2>
       {loading && <div>Cargando registros...</div>}
       {error && <div style={{ color: '#990000', fontWeight: 600 }}>{error}</div>}

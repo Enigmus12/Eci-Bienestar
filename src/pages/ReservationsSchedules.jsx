@@ -1,13 +1,20 @@
+
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ApiService from '../service/api';
+import Button from '../components/ui/Button';
 
 export default function ReservationsSchedules() {
+  const navigate = useNavigate();
   const [schedules, setSchedules] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [holidays, setHolidays] = useState([]);
+  const [holidaysLoading, setHolidaysLoading] = useState(false);
+  const [holidaysError, setHolidaysError] = useState('');
 
   const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
   const dayLabels = {
@@ -45,18 +52,14 @@ export default function ReservationsSchedules() {
 
   const handleReserve = async () => {
     if (!selectedGroup) return;
-    
     setError('');
     setResult(null);
     setLoading(true);
-    
     try {
-      const res = await ApiService.reserveGymGroup(selectedGroup.scheduleGroupId);
-      setResult(res);
-      // Refrescar los horarios para actualizar la capacidad
-      await fetchSchedules();
+      await ApiService.reserveGymGroup(selectedGroup.scheduleGroupId);
       setShowModal(false);
       setSelectedGroup(null);
+      navigate('/user');
     } catch (err) {
       setError(err.message || 'Error al reservar');
     } finally {
@@ -74,14 +77,25 @@ export default function ReservationsSchedules() {
     return schedules.filter(s => s.scheduleGroupId === scheduleGroupId);
   };
 
-  const handleSlotClick = (schedule) => {
+  const handleSlotClick = async (schedule) => {
     if (schedule) {
       const groupSchedules = getGroupSchedules(schedule.scheduleGroupId);
       setSelectedGroup({
         ...schedule,
         groupSchedules
       });
+      setHolidays([]);
+      setHolidaysError('');
+      setHolidaysLoading(true);
       setShowModal(true);
+      try {
+        const res = await ApiService.getHolidaySchedulesByGroup(schedule.scheduleGroupId);
+        setHolidays(res);
+      } catch (err) {
+        setHolidaysError('No se pudieron cargar los días festivos/reprogramados');
+      } finally {
+        setHolidaysLoading(false);
+      }
     }
   };
 
@@ -93,6 +107,11 @@ export default function ReservationsSchedules() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '1rem' }}>
+        <Button onClick={() => navigate('/user')} variant="outline">
+          <span style={{ fontSize: '18px', marginRight: 6 }}>←</span> Volver al inicio
+        </Button>
+      </div>
       <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#1f2937' }}>
         Horarios del Gimnasio
       </h2>
@@ -314,10 +333,47 @@ export default function ReservationsSchedules() {
               </p>
             </div>
 
+            {/* Mostrar días festivos/reprogramados */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h4 style={{ color: '#dc2626', margin: '0 0 0.5rem 0' }}>Días festivos o reprogramados</h4>
+              {holidaysLoading && <div>Cargando días festivos/reprogramados...</div>}
+              {holidaysError && <div style={{ color: '#dc2626' }}>{holidaysError}</div>}
+              {!holidaysLoading && holidays.length === 0 && !holidaysError && (
+                <div style={{ color: '#6b7280', fontSize: '14px' }}>No hay días festivos ni reprogramados en este grupo.</div>
+              )}
+              {!holidaysLoading && holidays.length > 0 && (
+                <ul style={{ paddingLeft: 18, margin: 0 }}>
+                  {holidays.map((h, idx) => {
+                    let dayName = '';
+                    try {
+                      const dateObj = new Date(h.date);
+                      dayName = dateObj.toLocaleDateString('es-ES', { weekday: 'long' });
+                    } catch {}
+                    return (
+                      <li key={h.id || idx} style={{ marginBottom: 4 }}>
+                        <span style={{ fontWeight: 500 }}>{h.date}</span>
+                        {dayName && (
+                          <span style={{ color: '#6b7280', marginLeft: 8 }}>({dayName})</span>
+                        )}
+                        {h.originalDate && h.originalDate !== h.date && (
+                          <span style={{ color: '#f59e42', marginLeft: 8 }}>Original: {h.originalDate}</span>
+                        )}
+                        {h.holidayDescription && (
+                          <span style={{ color: '#ef4444', marginLeft: 8 }}>{h.holidayDescription}</span>
+                        )}
+                        {h.rescheduled && (
+                          <span style={{ color: '#f59e42', marginLeft: 8 }}>[Reprogramado]</span>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+
             <h4 style={{ margin: '1rem 0', color: '#374151' }}>
               Horarios incluidos en este grupo:
             </h4>
-            
             <div style={{ marginBottom: '2rem' }}>
               {selectedGroup.groupSchedules.map(schedule => (
                 <div key={schedule.id} style={{

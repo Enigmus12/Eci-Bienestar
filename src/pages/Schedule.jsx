@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import ApiService from '../service/api';
+import Button from '../components/ui/Button';
+import { useNavigate } from 'react-router-dom';
 
 export default function Schedule() {
+  const navigate = useNavigate();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [capacity, setCapacity] = useState(1);
@@ -73,6 +76,11 @@ export default function Schedule() {
 
   return (
     <div style={{ padding: '2rem', textAlign: 'center', maxWidth: 500, margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '1rem' }}>
+        <Button onClick={() => navigate('/coaches')} variant="outline">
+          <span style={{ fontSize: '18px', marginRight: 6 }}>←</span> Volver al inicio
+        </Button>
+      </div>
       <h2>Crear Horarios</h2>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 24 }}>
         <div>

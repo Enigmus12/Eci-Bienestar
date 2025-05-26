@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import ApiService from '../service/api';
+import Button from '../components/ui/Button';
+import { useNavigate } from 'react-router-dom';
 
 export default function GetRoutines() {
+  const navigate = useNavigate();
   const [routines, setRoutines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -24,6 +27,11 @@ export default function GetRoutines() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: 800, margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '1rem' }}>
+        <Button onClick={() => navigate('/coaches')} variant="outline">
+          <span style={{ fontSize: '18px', marginRight: 6 }}>←</span> Volver al inicio
+        </Button>
+      </div>
       <h2>Rutinas Registradas</h2>
       {loading && <div>Cargando rutinas...</div>}
       {error && <div style={{ color: '#990000', fontWeight: 600 }}>{error}</div>}

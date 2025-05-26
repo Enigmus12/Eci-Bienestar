@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import ApiService from '../service/api';
+import Button from '../components/ui/Button';
+import { useNavigate } from 'react-router-dom';
 
 export default function CoachSchedules() {
+  const navigate = useNavigate();
   const [schedules, setSchedules] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -67,6 +70,11 @@ export default function CoachSchedules() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: 800, margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '1rem' }}>
+        <Button onClick={() => navigate('/coaches')} variant="outline">
+          <span style={{ fontSize: '18px', marginRight: 6 }}>←</span> Volver al inicio
+        </Button>
+      </div>
       <h2>Horarios de Gimnasio</h2>
       {loading && <div>Cargando horarios...</div>}
       {error && <div style={{ color: '#990000', fontWeight: 600 }}>{error}</div>}
