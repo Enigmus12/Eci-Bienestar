@@ -26,13 +26,13 @@ export default function Home() {
       <div className="home-cards-container">
         <div className="home-cards-wrapper">
           <Card
-            img="/public/resourses/1.jpg"
+            img="/resourses/1.jpg"
             title="Generar Turno"
             desc="Dale click en ingresar para generar un nuevo turno"
             onClick={() => navigate('/generar-turno')}
           />
           <Card
-            img="/public/resourses/2.jpg"
+            img="/resourses/2.jpg"
             title="Visualizar Turnos"
             desc="Consulta y visualiza los turnos asignados"
             onClick={() => navigate('/visualizacion-turno')}

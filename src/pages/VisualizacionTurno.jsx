@@ -77,7 +77,7 @@ export default function VisualizacionTurno() {
         </div>
         <aside className="panel-multimedia">
           <video width="100%" autoPlay loop muted controls>
-            <source src="/public/resourses/video1.mp4" type="video/mp4" />
+            <source src="/resourses/video1.mp4" type="video/mp4" />
             Tu navegador no soporta la reproducción de video.
           </video>
         </aside>
