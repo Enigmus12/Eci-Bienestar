@@ -66,7 +66,7 @@ export default function TurnoForm() {
     try {
       const dto = {
         userId: form.documento,
-        specialty: form.especialidad,
+        specialty: form.especialidad.normalize('NFD').replace(/\p{Diacritic}/gu, '') === 'Psicologia' ? 'Psicologia' : form.especialidad,
         specialPriority: prioridadActiva
       };
 
@@ -126,9 +126,13 @@ export default function TurnoForm() {
           <label>Especialidad</label>
           <select name="especialidad" value={form.especialidad} onChange={handleChange}>
             <option value="">Seleccione...</option>
-            {especialidadesDisponibles.map(esp => (
-              <option key={esp} value={esp}>{esp}</option>
-            ))}
+            {especialidadesDisponibles.map(esp => {
+              // Normalizar value para Psicologia
+              const value = esp.normalize('NFD').replace(/\p{Diacritic}/gu, '') === 'Psicologia' ? 'Psicologia' : esp;
+              return (
+                <option key={esp} value={value}>{esp}</option>
+              );
+            })}
           </select>
         </div>
       </div>
