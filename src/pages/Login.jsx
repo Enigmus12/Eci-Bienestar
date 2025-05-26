@@ -33,8 +33,10 @@ export default function Login() {
           navigate('/user');
         } else if (payload.role === 'Coache') {
           navigate('/coaches');
+        } else if (payload.role === 'Teacher') {
+          navigate('/profesional-turnos');
         } else {
-          setError('Solo los usuarios con rol Admin, Student o Coache pueden ingresar aquí.');
+          setError('Solo los usuarios con rol Admin, Student, Coache o Teacher pueden ingresar aquí.');
         }
       } else {
         setError('Respuesta inválida del servidor.');
