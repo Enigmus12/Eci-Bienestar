@@ -44,6 +44,17 @@ class ApiService {
       throw new Error(error.response?.data || 'No se pudo eliminar el turno');
     }
   }
+
+  // Obtener datos de usuario por ID
+  static async getUserById(userId) {
+    try {
+      // Ajusta la URL según tu arquitectura real
+      const response = await axios.get(`https://shiftmanager-hrbgeaamdmg6ehb5.canadacentral-01.azurewebsites.net/user-service/users/${userId}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data || 'No se pudo obtener el usuario');
+    }
+  }
 }
 
 export default ApiService;

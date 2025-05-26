@@ -33,7 +33,27 @@ export default function AdminTurno() {
       setError('');
       try {
         const data = await ApiService.getTurnos();
-        setTurnos(data);
+        // Enriquecer turnos con nombre y rol de usuario
+        const userCache = {};
+        const turnosEnriquecidos = await Promise.all(data.map(async (turno) => {
+          if (userCache[turno.userId]) {
+            return { ...turno, nombre: userCache[turno.userId].username, rol: userCache[turno.userId].userRole };
+          }
+          try {
+            // Si el backend ya retorna username y userRole, úsalo directamente
+            if (turno.username && turno.userRole) {
+              userCache[turno.userId] = { username: turno.username, userRole: turno.userRole };
+              return { ...turno, nombre: turno.username, rol: turno.userRole };
+            }
+            // Si no, consulta el servicio de usuario
+            const user = await ApiService.getUserById(turno.userId);
+            userCache[turno.userId] = user;
+            return { ...turno, nombre: user.username || user.name, rol: user.userRole || user.role };
+          } catch {
+            return { ...turno, nombre: 'Sin nombre', rol: 'Sin rol' };
+          }
+        }));
+        setTurnos(turnosEnriquecidos);
       } catch (err) {
         setError('No se pudieron cargar los turnos');
       } finally {
