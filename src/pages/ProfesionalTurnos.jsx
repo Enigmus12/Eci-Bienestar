@@ -1,45 +1,78 @@
 import React, { useEffect, useState } from 'react';
+import ApiService from '../service/apiM1';
 
 const especialidades = [
   'Medicina General',
-  'Psicología',
-  'Nutrición',
-  'Fisioterapia',
-];
-
-const mockTurnos = [
-  { id: 'M-01', paciente: 'Ana María Rodríguez', doc: '1020304050', estado: 'Pendiente', hora: '16:24' },
-  { id: 'M-02', paciente: 'Carlos Jiménez', doc: '1122334455', estado: 'Pendiente', hora: '16:29' },
-  { id: 'M-03', paciente: 'Laura Martínez', doc: '9988776655', estado: 'Pendiente', hora: '16:34' },
+  'Psicologia',
+  'Odontología'
 ];
 
 export default function ProfesionalTurnos() {
   const [turnos, setTurnos] = useState([]);
   const [especialidad, setEspecialidad] = useState(especialidades[0]);
   const [loading, setLoading] = useState(false);
-  const [tab, setTab] = useState('lista');
   const [estadoFiltro, setEstadoFiltro] = useState('Todos los estados');
 
   useEffect(() => {
-    setTurnos(mockTurnos);
+    const fetchTurnos = async () => {
+      setLoading(true);
+      try {
+        const data = await ApiService.getTurnos();
+        setTurnos(data);
+      } catch (err) {
+        setTurnos([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTurnos();
   }, []);
 
-  const turnoActual = turnos.length > 0 ? turnos[0] : null;
+  // Filtrar turnos por especialidad y estado
+  const turnosFiltrados = turnos.filter(t => {
+    const matchEspecialidad = t.specialty === especialidad;
+    const matchEstado = estadoFiltro === 'Todos los estados' ||
+      (estadoFiltro === 'Pendiente' && (t.status === 'IN_PROGRESS' || t.status === 'ASSIGNED')) ||
+      (estadoFiltro === 'Atendido' && t.status === 'COMPLETED') ||
+      (estadoFiltro === 'Cancelado' && t.status === 'CANCELLED');
+    return matchEspecialidad && matchEstado;
+  });
 
-  const handleLlamarSiguiente = () => {
-    if (turnos.length > 0) {
-      setTurnos((prev) => prev.slice(1));
+  const turnoActual = turnosFiltrados.length > 0 ? turnosFiltrados[0] : null;
+
+  const handleLlamarSiguiente = async () => {
+    if (turnosFiltrados.length > 0) {
+      const turnoActual = turnosFiltrados[0];
+      // Cambiar el estado del turno actual a 'ATTENDED' en el backend
+      try {
+        await ApiService.updateTurnStatus(turnoActual.turnCode, 'ATTENDED');
+      } catch (e) {}
+      setTurnos(prev => prev.map(t =>
+        t.turnCode === turnoActual.turnCode ? { ...t, status: 'ATTENDED' } : t
+      ).filter(t => t.turnCode !== turnoActual.turnCode));
     }
   };
 
-  const handleLlamar = (id) => {
-    // Aquí podrías agregar lógica para notificar al paciente
-    alert('Llamando al paciente del turno ' + id);
+  const handleLlamar = (turnCode) => {
+    alert('Llamando al paciente del turno ' + turnCode);
   };
 
-  const handleCancelar = (id) => {
-    setTurnos((prev) => prev.filter((t) => t.id !== id));
+  const handleCancelar = (turnCode) => {
+    setTurnos(prev => prev.filter(t => t.turnCode !== turnCode));
   };
+
+  // Cuando se muestra el turno actual, si no está en IN_PROGRESS, actualizarlo
+  useEffect(() => {
+    if (turnoActual && turnoActual.status !== 'IN_PROGRESS') {
+      ApiService.updateTurnStatus(turnoActual.turnCode, 'IN_PROGRESS')
+        .then(() => {
+          setTurnos(prev => prev.map(t =>
+            t.turnCode === turnoActual.turnCode ? { ...t, status: 'IN_PROGRESS' } : t
+          ));
+        })
+        .catch(() => {});
+    }
+  }, [turnoActual]);
 
   return (
     <div style={{ padding: '32px 0', background: '#f7f8fa', minHeight: '100vh' }}>
@@ -61,9 +94,9 @@ export default function ProfesionalTurnos() {
               <div style={{ color: '#888', fontSize: 15, marginBottom: 24 }}>Paciente en atención</div>
               {turnoActual ? (
                 <div style={{ textAlign: 'center', marginBottom: 16 }}>
-                  <div style={{ fontSize: 40, fontWeight: 700, color: '#990000' }}>{turnoActual.id}</div>
-                  <div style={{ fontWeight: 600 }}>{turnoActual.paciente}</div>
-                  <div style={{ color: '#888', fontSize: 15 }}>{turnoActual.doc}</div>
+                  <div style={{ fontSize: 40, fontWeight: 700, color: '#990000' }}>{turnoActual.turnCode}</div>
+                  <div style={{ fontWeight: 600 }}>{turnoActual.username || turnoActual.userId || 'Sin nombre'}</div>
+                  <div style={{ color: '#888', fontSize: 15 }}>{turnoActual.userId}</div>
                 </div>
               ) : (
                 <div style={{ color: '#bbb', textAlign: 'center', margin: '32px 0' }}>
@@ -71,7 +104,7 @@ export default function ProfesionalTurnos() {
                   No hay paciente en atención
                 </div>
               )}
-              <button onClick={handleLlamarSiguiente} disabled={turnos.length === 0} style={{ marginTop: 12, width: '100%', padding: '12px 0', background: '#111', color: '#fff', border: 'none', borderRadius: 6, fontSize: 16, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <button onClick={handleLlamarSiguiente} disabled={turnosFiltrados.length === 0} style={{ marginTop: 12, width: '100%', padding: '12px 0', background: '#111', color: '#fff', border: 'none', borderRadius: 6, fontSize: 16, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                 <span role="img" aria-label="bell">🔔</span> Llamar Siguiente Turno
               </button>
             </div>
@@ -82,7 +115,7 @@ export default function ProfesionalTurnos() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: 22 }}>Gestión de Turnos</div>
-                  <div style={{ color: '#888', fontSize: 15 }}>{turnos.length} turnos pendientes para {especialidad}</div>
+                  <div style={{ color: '#888', fontSize: 15 }}>{turnosFiltrados.length} turnos pendientes para {especialidad}</div>
                 </div>
                 <select value={estadoFiltro} onChange={e => setEstadoFiltro(e.target.value)} style={{ padding: 8, borderRadius: 6, border: '1px solid #ccc', fontSize: 15 }}>
                   <option>Todos los estados</option>
@@ -92,8 +125,7 @@ export default function ProfesionalTurnos() {
                 </select>
               </div>
               <div style={{ display: 'flex', borderBottom: '1px solid #eee', marginBottom: 16 }}>
-                <button onClick={() => setTab('lista')} style={{ flex: 1, padding: 12, background: tab === 'lista' ? '#f7f8fa' : 'transparent', border: 'none', borderBottom: tab === 'lista' ? '2px solid #990000' : 'none', fontWeight: 600, fontSize: 16 }}>Lista de Turnos</button>
-                <button onClick={() => setTab('proximos')} style={{ flex: 1, padding: 12, background: tab === 'proximos' ? '#f7f8fa' : 'transparent', border: 'none', borderBottom: tab === 'proximos' ? '2px solid #990000' : 'none', fontWeight: 600, fontSize: 16, color: '#888' }}>Próximos Turnos</button>
+                <button style={{ flex: 1, padding: 12, background: '#f7f8fa', border: 'none', borderBottom: '2px solid #990000', fontWeight: 600, fontSize: 16 }}>Lista de Turnos</button>
               </div>
               {/* Tabla de turnos */}
               <div style={{ overflowX: 'auto' }}>
@@ -108,27 +140,29 @@ export default function ProfesionalTurnos() {
                     </tr>
                   </thead>
                   <tbody>
-                    {turnos.length === 0 ? (
+                    {loading ? (
+                      <tr><td colSpan={5} style={{ textAlign: 'center', color: '#bbb', padding: 24 }}>Cargando turnos...</td></tr>
+                    ) : turnosFiltrados.length === 0 ? (
                       <tr><td colSpan={5} style={{ textAlign: 'center', color: '#bbb', padding: 24 }}>No hay turnos pendientes.</td></tr>
                     ) : (
-                      turnos.map((turno, idx) => (
-                        <tr key={turno.id} style={{ background: idx % 2 === 0 ? '#fff' : '#f7f8fa' }}>
+                      turnosFiltrados.map((turno, idx) => (
+                        <tr key={turno.turnCode || turno.id || idx} style={{ background: idx % 2 === 0 ? '#fff' : '#f7f8fa' }}>
                           <td style={{ padding: 8, fontWeight: 600 }}>
-                            {turno.id} {idx === 0 && <span style={{ color: '#d00', fontWeight: 700, marginLeft: 4 }}>P</span>}
+                            {turno.turnCode} {turno.specialPriority && <span style={{ color: '#d00', fontWeight: 700, marginLeft: 4 }}>P</span>}
                           </td>
                           <td style={{ padding: 8 }}>
-                            <div style={{ fontWeight: 600 }}>{turno.paciente}</div>
-                            <div style={{ color: '#888', fontSize: 13 }}>{turno.doc}</div>
+                            <div style={{ fontWeight: 600 }}>{turno.username || turno.userId || 'Sin nombre'}</div>
+                            <div style={{ color: '#888', fontSize: 13 }}>{turno.userId}</div>
                           </td>
                           <td style={{ padding: 8 }}>
-                            <span style={{ background: '#eaf1ff', color: '#2563eb', borderRadius: 12, padding: '2px 12px', fontWeight: 600, fontSize: 14 }}>{turno.estado}</span>
+                            <span style={{ background: '#eaf1ff', color: '#2563eb', borderRadius: 12, padding: '2px 12px', fontWeight: 600, fontSize: 14 }}>{turno.status}</span>
                           </td>
-                          <td style={{ padding: 8 }}>{turno.hora}</td>
+                          <td style={{ padding: 8 }}>{turno.createdAt ? new Date(turno.createdAt + 'Z').toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-'}</td>
                           <td style={{ padding: 8, display: 'flex', gap: 8 }}>
-                            <button onClick={() => handleLlamar(turno.id)} style={{ background: '#fff', border: '1px solid #bbb', borderRadius: 6, padding: '6px 14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                            <button onClick={() => handleLlamar(turno.turnCode)} style={{ background: '#fff', border: '1px solid #bbb', borderRadius: 6, padding: '6px 14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
                               <span role="img" aria-label="bell">🔔</span> Llamar
                             </button>
-                            <button onClick={() => handleCancelar(turno.id)} style={{ background: '#fff', border: '1px solid #d00', color: '#d00', borderRadius: 6, padding: '6px 14px', fontWeight: 600, cursor: 'pointer' }}>
+                            <button onClick={() => handleCancelar(turno.turnCode)} style={{ background: '#fff', border: '1px solid #d00', color: '#d00', borderRadius: 6, padding: '6px 14px', fontWeight: 600, cursor: 'pointer' }}>
                               <span role="img" aria-label="cancel">❌</span> Cancelar
                             </button>
                           </td>
