@@ -6,12 +6,12 @@ import HomeInfo from '../components/HomeInfo';
 import '../assets/Styles/home.css';
 
 const imagenes = [
-  '/public/resourses/uno.jpg',
-  '/public/resourses/2.jpg',
-  '/public/resourses/3.jpg',
-  '/public/resourses/4.jpg',
-  '/public/resourses/5.jpg',
-  '/public/resourses/6.jpg'
+  '/resourses/uno.jpg',
+  '/resourses/2.jpg',
+  '/resourses/3.jpg',
+  '/resourses/4.jpg',
+  '/resourses/5.jpg',
+  '/resourses/6.jpg'
 ];
 
 export default function Home() {
