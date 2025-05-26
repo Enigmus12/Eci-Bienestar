@@ -3,9 +3,8 @@ import ApiService from '../service/apiM1';
 
 const especialidades = [
   'Medicina General',
-  'Psicología',
-  'Nutrición',
-  'Fisioterapia',
+  'Psicologia',
+  'Odontología'
 ];
 
 export default function ProfesionalTurnos() {
@@ -129,7 +128,7 @@ export default function ProfesionalTurnos() {
                       turnosFiltrados.map((turno, idx) => (
                         <tr key={turno.turnCode || turno.id || idx} style={{ background: idx % 2 === 0 ? '#fff' : '#f7f8fa' }}>
                           <td style={{ padding: 8, fontWeight: 600 }}>
-                            {turno.turnCode} {idx === 0 && <span style={{ color: '#d00', fontWeight: 700, marginLeft: 4 }}>P</span>}
+                            {turno.turnCode} {turno.specialPriority && <span style={{ color: '#d00', fontWeight: 700, marginLeft: 4 }}>P</span>}
                           </td>
                           <td style={{ padding: 8 }}>
                             <div style={{ fontWeight: 600 }}>{turno.username || turno.userId || 'Sin nombre'}</div>
