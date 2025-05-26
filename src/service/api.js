@@ -1,4 +1,3 @@
-
 // src/service/api.js
 // Clase para manejar peticiones a la API y gestión de token
 
@@ -390,6 +389,11 @@ class ApiService {
       throw new Error(errorText || 'Error al obtener días festivos/reprogramados');
     }
     return response.json();
+  }
+
+  static removeToken() {
+    this.token = null;
+    localStorage.removeItem('token');
   }
 
 
