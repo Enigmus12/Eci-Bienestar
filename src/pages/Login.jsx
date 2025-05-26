@@ -58,7 +58,7 @@ export default function Login() {
 
         {/* Imagen del logo institucional */}
         <img
-          src="/public/resourses/LOGO.png"
+          src="/resourses/LOGO.png"
           alt="Logo Institucional"
           style={{ width: 120, marginBottom: 16 }}
         />
