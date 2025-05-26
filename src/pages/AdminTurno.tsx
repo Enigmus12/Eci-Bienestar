@@ -102,7 +102,7 @@ export default function AdminTurno() {
   return (
     <div style={{ background: '#fafafa', minHeight: '100vh', padding: 32 }}>
       <h1 style={{ textAlign: 'center', fontSize: 48, fontWeight: 700, marginBottom: 32 }}>Administrar Turnos</h1>
-      <table style={{ width: '100%', maxWidth: 800, margin: '0 auto', borderCollapse: 'collapse', marginBottom: 40 }}>
+      <table style={{ width: '100%', maxWidth: 1000, margin: '0 auto', borderCollapse: 'collapse', marginBottom: 40 }}>
         <thead>
           <tr style={{ background: '#900', color: '#fff', fontSize: 20 }}>
             <th style={{ padding: 12 }}>Especialidad</th>
@@ -144,7 +144,21 @@ export default function AdminTurno() {
         <select
           value={especialidadSeleccionada}
           onChange={e => setEspecialidadSeleccionada(e.target.value)}
-          style={{ fontSize: 18, padding: '8px 16px', borderRadius: 6, border: '1px solid #888', minWidth: 200 }}
+          style={{
+            fontSize: 18,
+            padding: '8px 10px',
+            borderRadius: 6,
+            border: '1px solid #888',
+            minWidth: 180,
+            maxWidth: 240,
+            width: '100%',
+            background: '#fff',
+            color: '#222', // color de letra oscuro
+            margin: '0 auto',
+            display: 'block',
+            textAlign: 'center',
+            boxShadow: '0 1px 4px #0001'
+          }}
         >
           <option value="Todos">Todos</option>
           {Object.keys(turnosPorEspecialidad).map(esp => (
@@ -191,7 +205,7 @@ export default function AdminTurno() {
                   <td>{turno.numero || turno.turnCode || '-'}</td>
                   <td>{turno.status || '-'}</td>
                   <td>
-                    <button onClick={() => handleEliminarTurno(turno.numero || turno.turnCode)} style={{ background: '#d32f2f', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 16px', fontWeight: 600, cursor: 'pointer' }} disabled={!(turno.numero || turno.turnCode)}>
+                    <button onClick={() => handleEliminarTurno(turno.turnCode)} style={{ background: '#d32f2f', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 16px', fontWeight: 600, cursor: 'pointer' }} disabled={!turno.turnCode}>
                       Eliminar
                     </button>
                   </td>
