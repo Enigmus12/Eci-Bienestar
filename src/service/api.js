@@ -357,6 +357,23 @@ class ApiService {
     return response.json();
   }
 
+    // Cancela un horario específico por fecha
+  static async cancelScheduleByDate(date) {
+    const token = this.getToken();
+    const response = await fetch(`${API_BASE_URL}/daily-schedule/remove-user/by-date/${date}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al cancelar horario');
+    }
+    return response.json();
+  }
+
 
 }
 

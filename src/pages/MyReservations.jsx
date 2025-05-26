@@ -56,6 +56,28 @@ export default function MyReservations() {
   const [schedules, setSchedules] = useState({});
   const [currentIdx, setCurrentIdx] = useState(0);
   const [rescheduled, setRescheduled] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  // Función para cancelar reserva por fecha
+  // Guardar referencia a fetchReservations para usarla en handleCancelReservation
+  const [fetchReservationsRef] = useState({ current: null });
+
+  const handleCancelReservation = async (date) => {
+    setCancelLoading(true);
+    setError("");
+    try {
+      await ApiService.cancelScheduleByDate(date);
+      setSelectedDate(null);
+      // Llama a fetchReservations para refrescar la UI sin recargar la página
+      if (fetchReservationsRef.current) {
+        await fetchReservationsRef.current();
+      }
+    } catch (err) {
+      setError("No se pudo cancelar la reserva: " + (err?.response?.data || err.message));
+    } finally {
+      setCancelLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchReservations = async () => {
@@ -64,7 +86,7 @@ export default function MyReservations() {
       try {
         const data = await ApiService.getMyReservations();
         setReservations(data);
-        
+
         // Obtener todos los horarios y mapear por id
         const allSchedules = await ApiService.getAllSchedules();
         const scheduleMap = {};
@@ -84,6 +106,7 @@ export default function MyReservations() {
         setLoading(false);
       }
     };
+    fetchReservationsRef.current = fetchReservations;
     fetchReservations();
   }, []);
 
@@ -405,20 +428,25 @@ export default function MyReservations() {
                         const date = new Date(week.start);
                         date.setDate(date.getDate() + dayOffset);
                         const dateStr = date.toISOString().slice(0, 10);
-                        
                         if (reschedOriginalDates.includes(dateStr)) return null;
-                        
+                        const isSelected = selectedDate === dateStr;
                         return (
-                          <div key={res.id || idx} style={{
-                            display: 'grid',
-                            gridTemplateColumns: '1fr 120px 120px',
-                            gap: '12px',
-                            backgroundColor: 'white',
-                            padding: '16px',
-                            borderRadius: '8px',
-                            border: '1px solid #E5E7EB',
-                            alignItems: 'center'
-                          }}>
+                          <div
+                            key={res.id || idx}
+                            style={{
+                              display: 'grid',
+                              gridTemplateColumns: isSelected ? '1fr 120px 120px 120px' : '1fr 120px 120px',
+                              gap: '12px',
+                              backgroundColor: isSelected ? '#DBEAFE' : 'white',
+                              padding: '16px',
+                              borderRadius: '8px',
+                              border: isSelected ? '2px solid #2563EB' : '1px solid #E5E7EB',
+                              alignItems: 'center',
+                              cursor: 'pointer',
+                              transition: 'background 0.2s, border 0.2s'
+                            }}
+                            onClick={() => setSelectedDate(isSelected ? null : dateStr)}
+                          >
                             <div style={{
                               display: 'flex',
                               alignItems: 'center',
@@ -456,6 +484,21 @@ export default function MyReservations() {
                             }}>
                               {res.endTime}
                             </div>
+                            {isSelected && (
+                              <div style={{ textAlign: 'center' }}>
+                                <Button
+                                  variant="destructive"
+                                  style={{ minWidth: 90, fontSize: 13, padding: '8px 12px' }}
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleCancelReservation(dateStr);
+                                  }}
+                                  disabled={cancelLoading}
+                                >
+                                  {cancelLoading ? 'Cancelando...' : 'Cancelar'}
+                                </Button>
+                              </div>
+                            )}
                           </div>
                         );
                       })
