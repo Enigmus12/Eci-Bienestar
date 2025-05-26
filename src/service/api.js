@@ -1,3 +1,4 @@
+
 // src/service/api.js
 // Clase para manejar peticiones a la API y gestión de token
 
@@ -370,6 +371,23 @@ class ApiService {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(errorText || 'Error al cancelar horario');
+    }
+    return response.json();
+  }
+
+    // Obtener días festivos o reprogramados por grupo de horarios
+  static async getHolidaySchedulesByGroup(scheduleGroupId) {
+    const token = this.getToken();
+    const response = await fetch(`${API_BASE_URL}/daily-schedule/holidays/by-group/${scheduleGroupId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Error al obtener días festivos/reprogramados');
     }
     return response.json();
   }

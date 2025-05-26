@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import ApiService from '../service/api';
+import Button from '../components/ui/Button';
+import { useNavigate } from 'react-router-dom';
 
 export default function CreateRoutine() {
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [objective, setObjective] = useState('');
   const [description, setDescription] = useState('');
@@ -48,6 +51,11 @@ export default function CreateRoutine() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: 600, margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '1rem' }}>
+        <Button onClick={() => navigate('/coaches')} variant="outline">
+          <span style={{ fontSize: '18px', marginRight: 6 }}>←</span> Volver al inicio
+        </Button>
+      </div>
       <h2>Crear Rutina</h2>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <input placeholder="Nombre" value={name} onChange={e => setName(e.target.value)} required />
