@@ -9,7 +9,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-left">
-        <img src="/public/resourses/LogoEscuela.jpg" alt="Logo Escuela" className="navbar-logo" />
+        <img src="/resourses/LogoEscuela.jpg" alt="Logo Escuela" className="navbar-logo" />
         <span className="navbar-title">ECI BIENESTAR TOTAL</span>
         <Link to="/" className="navbar-link">Inicio</Link>
         <Link to="#" className="navbar-link">Nosotros</Link>
