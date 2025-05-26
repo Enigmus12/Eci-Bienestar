@@ -44,11 +44,9 @@ export default function TurnoForm() {
 
     try {
       const dto = {
-        descripcion: "Turno generado desde formulario",
-        status: "IN_PROGRESS",
-        specialPriority: prioridadActiva,
         userId: form.documento,
-        specialty: form.especialidad
+        specialty: form.especialidad,
+        specialPriority: prioridadActiva
       };
 
       console.log("DTO enviado:", dto);
